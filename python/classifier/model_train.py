@@ -89,8 +89,8 @@ d3 = classInfo(abbreviation='d3', name= 'ThreeTag Data',       index=1, color='o
 ##t4 = classInfo(abbreviation='t4', name= r'FourTag $t\bar{t}$', index=2, color='green')
 ##t3 = classInfo(abbreviation='t3', name=r'ThreeTag $t\bar{t}$', index=3, color='cyan')
 
-sg = classInfo(abbreviation='sg', name=  'Signal Data',       index=0, color='red')
-bg = classInfo(abbreviation='bg', name= 'Background Data',    index=1, color='orange')
+sg = classInfo(abbreviation='sg', name=  'Signal Data',       index=1, color='red')
+bg = classInfo(abbreviation='bg', name= 'Background Data',    index=0, color='orange')
 
 def getFrame(fileName):
     yearIndex = fileName.find('201')
@@ -289,6 +289,10 @@ class loaderResults_SvB:
                                 self.w,
                                 'Signal',
                                 'Background')
+
+            if doBamber:
+                self.roc.auc_ci = auc_ci.bamber(np.array(self.y_true==d4.index), self.y_pred[:,d4.index], self.roc.auc)
+                print("Bamber CI: ", self.roc.auc_ci)
 
 ##                zhIndex = self.y_true!=zz.index
 ##                self.roc_zh = roc_data(np.array(self.y_true[zhIndex]==zh.index, dtype=np.float), 
@@ -512,6 +516,7 @@ class loaderResults_FvT:
                 self.roc_43.auc_ci = auc_ci.bamber(np.array(self.y_true==d4.index), self.y_pred[:,d4.index], self.roc_43.auc)
                 print("Bamber CI: ", self.roc_43.auc_ci)
             self.roc = self.roc_43 #+ self.roc_td.auc - 1
+
 class modelParameters:
 
 ##    def __init__(self, dfB, dfS, yTrueLabel='fourTag', filename=None, classifier='FvT', weight='weight',
@@ -1202,7 +1207,7 @@ class modelParameters:
         print("Running update now")
         print("self epoch")
         print(self.epoch)
-        results.update(y_pred, y_true, q_score, w_ordered, loss, doROC, doBamber= (self.epoch==10))
+        results.update(y_pred, y_true, q_score, w_ordered, loss, doROC, doBamber=(self.epoch==10))
 
 
     def validate(self, doROC=True):
