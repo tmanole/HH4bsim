@@ -522,12 +522,9 @@ class modelParameters:
 
 
     def __init__(self, dfB, dfS, lrInit=0.01, train_batch_size=512, num_params=6, yTrueLabel='fourTag', fileName=None, classifier='FvT', bamber=True, epochs=10, fixedSchedule=True, bs_milestones=[1,3,6], lr_milestones=[8,9],
-                 model_path=False, data_name='', method_name='', region='CR', onnx=False, update=False, storeEventFile=False):
+                 model_path=False, onnx=False, update=False, storeEventFile=False):
 
         self.modelPath = model_path
-        self.data_name = data_name
-        self.method_name = method_name
-        self.region = region
         
         self.fileName = fileName
         self.bamber = bamber
@@ -899,11 +896,6 @@ class modelParameters:
             if self.classifier in ['M1vM2']: self.validation.roc_auc_best = 0.5
 
         print("--------------- LRINIT: ", self.lrInit)
-
-        #if self.fit_validation:
-        #    self.modelPath = '../results/' + self.data_name + '/' + self.method_name + '/fvt_validation/' + self.region + '/'
-        #else:
-        #    self.modelPath = 'fvt_fit/'
         
         self.modelPkl = fileName
         self.epoch = self.startingEpoch
