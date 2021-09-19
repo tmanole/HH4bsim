@@ -737,14 +737,14 @@ class modelParameters:
                 ##df['xWt'] = 1
                 ##df['nSelJets'] = 1
 
-                print("____ DF SHAPE ______")
-                print(df.shape[0])
+                ####print("____ DF SHAPE ______")
+                ####print(df.shape[0])
         
-                df.drop(df[df['weight'] == 0].index, inplace=True)
+                ####df.drop(df[df['weight'] == 0].index, inplace=True)
 
-                df.to_hdf("horizout.h5", key="df", mode="w") 
-                n = df.shape[0]
-                print("EFFN ", n)
+                ####df.to_hdf("horizout.h5", key="df", mode="w") 
+                ####n = df.shape[0]
+                ####print("EFFN ", n)
 
 
                 print("add encoded target")
