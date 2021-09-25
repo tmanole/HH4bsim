@@ -3,13 +3,12 @@ import time
 import sys
 from make_hists import *
 import pathlib
-import rootToy4b
 import pandas as pd
 import os
 
 from threading import Thread
 
-from validation import validation_classifier
+###from validation import validation_classifier
 
 import argparse
 parser = argparse.ArgumentParser(description='')
@@ -328,13 +327,14 @@ if args.make_univariate_hists:
 
 ### Update SvB Weights
 
+##### Call fns under SvB dir
 
 
 
 
 ### Update FvT Weights
 
-
+#### Call fns under FvT dir
 
 
 
@@ -414,3 +414,125 @@ else:
     bbbj_tree = fit_tree.CloneTree()
     bbbj_file.Write()
     fit_file.Close()
+
+
+
+plotting = args.plot or args.sumplot
+
+
+#if args.fit or plotting or args.updateweights or args.updateweights:
+#    tree_names = []
+#    trees = []
+#    weight_names = []
+#    pl_regions = []
+#
+#    if args.updateweights:
+#        tree_names = ["true", "true_large", "sig_HH4b", "sig_S270HH4b", "sig_S280HH4b"]
+#        trees = [bbbb_tree, bbbb_large_tree, sig_HH4b_tree, sig_S270HH4b_tree, sig_S280HH4b_tree]
+#        weight_names = ["true", "true_large", "sig_HH4b", "sig_S270HH4b", "sig_S280HH4b"]
+#        pl_regions = ["CRSR", "CRSR", "CRSR", "CRSR", "CRSR"]
+#
+#    if args.plot or args.fit:
+#        tree_names.append(method_name)
+#        trees.append(fit_tree)
+#        weight_names.append("3b")
+#        pl_regions.append(args.targetregion)
+#
+#    prepare_plot_trees(trees, tree_names, weight_names, pl_regions, data=data)
+
+if plotting: # or args.validation:
+
+#    if method == "HH-FvT" or method == "HH-RF":
+#        f2 = ROOT.TFile("../results/" + data + "/" + method_name + "/true.root")
+#        bbbb_tree = f2.Get("Tree")
+
+    mHH = (data != 'MG1')
+
+    # Put a flag here to make sure user has all requisite files.
+
+#    plot_tree_path = get_plot_tree_path(data)
+#
+#    file_true =       ROOT.TFile(plot_tree_path + "true.root", "READ")
+#    file_true_large = ROOT.TFile(plot_tree_path + "true_large.root", "READ")
+#    file_sig1 =       ROOT.TFile(plot_tree_path + "sig_HH4b.root", "READ")
+#
+#    tree_true_large_weighted = file_true_large.Get("Tree")
+#    tree_sig_HH4b_weighted = file_sig1.Get("Tree")
+
+    if args.plot:
+#        file_fit =        ROOT.TFile(plot_tree_path + tree_names[-1] + ".root", "READ")
+#        tree_fit = file_fit.Get("Tree")
+
+#        if plot_reweight_distr:
+#            f_rew = ROOT.TFile("../results/" + data + "/" + method_name+ "/true.root")
+#            tree_true_reweight = f_rew.Get("Tree")
+#
+#        else:
+#            tree_true_reweight = False
+#
+        fit_plots(tree_true=bbbb_tree,
+                  tree_true_large=bbbb_large_tree,
+                  tree_sig_HH4b=sig_HH4b_tree,
+                  tree_fit=bbbj_tree,
+                  SvB=True,
+                  mHH = mHH,
+                  reweight=plot_reweight_distr,
+                  data=data,
+                  method_name=method_name,
+                  method=method,
+                  regions=target,
+                  fromnp=False)
+
+
+    # Next step: Merge this step with make_summary_hists below. Use these updated trees therein. 
+    #   
+
+"""
+    if args.sumplot:
+        methods = ["HH-FvT", "HH-Comb-FvT", "HH-OT"]
+        method_names = [get_method_name(m) for m in methods]
+        out_paths = ["../results/" + data + "/plot_trees/" + m + ".root" for m in method_names]
+        print(out_paths)
+#        [pathlib.Path(o).mkdir(parents=True, exist_ok=True) for o in out_paths]
+#        out_paths = [o + "fit.root" for o in out_paths]
+
+        tfiles = [ROOT.TFile(o, "READ") for o in out_paths]
+        ttrees = [f.Get("Tree") for f in tfiles]
+
+    #    if method == "HH-FvT" or method == "HH-RF":
+    #        f2 = ROOT.TFile("../results/" + data + "/" + method_name + "/true.root")
+    #        bbbb_tree = f2.Get("Tree")
+
+        make_summary_hists(
+                    tree_true_weighted,
+#                    tree_true_large_weighted, 
+                    ttrees[0],
+                    ttrees[1],
+                    ttrees[2],
+                    tree_sig_HH4b_weighted,
+                    tree_sig_S270HH4b_weighted,
+                    tree_sig_S280HH4b_weighted,
+#                   tree_true=tree_true_weighted, 
+#                   tree_true,
+#                   ttrees[0],            
+#                   ttrees[1], 
+#                   sig_HH4b_tree, 
+#                   sig_S270HH4b_tree, 
+#                   sig_S280HH4b_tree,
+                   data=data
+                  )
+
+if args.validation:
+    region = target[-1]
+    pathlib.Path(out_path.replace("fit.root", "") +"fvt_validation/" + region).mkdir(parents=True, exist_ok=True)
+    validation_classifier(fit_tree, aux_dir + "events/" + data + "/dataframes/bbbb_large.h5", data_name=data, method_name=method_name, region=region, epochs=40, num_params=num_params, lrInit=lrInit, train_batch_size=train_batch_size)
+
+#              SvB=True, 
+#              mHH = mHH, 
+#              reweight=reweight, 
+#              data=data, 
+#              method_name=method_name, 
+#              method=method, 
+#              regions=target, 
+#              fromnp=False)
+"""

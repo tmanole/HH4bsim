@@ -42,193 +42,7 @@ def normHist(hist):
         print("normHist integral is zero:",hist.GetName())
     hist.GetYaxis().SetTitle("Normalized Entries")
 
-def plot(t4b, t2b, branch, bins, cut, fit_vs_fit=False, weights=True, canvas=None, norm=False, branchfit=None, xAxisTitle="", method="", ratio_min=0.5, ratio_max=1.5, hist_file=None):
-    if branchfit is None:
-        branchfit = branch
-
-    if weights:        
-        t2b.Draw(branchfit+">>h2b_"+branchfit+bins,"weight*("+cut+")")  #(29038/28017)*
-
-    else:
-        t2b.Draw(branchfit+">>h2b_"+branchfit+bins,cut)  #(29038/28017)*
-
-    h2b = ROOT.gDirectory.Get("h2b_"+branchfit)
-
-    if fit_vs_fit:
-        t4b.Draw(branch+">>h4b_"+branch+bins,"weight*("+cut+")")
-
-    else:
-        t4b.Draw(branch+">>h4b_"+branch+bins,cut)
-
-    h4b = ROOT.gDirectory.Get("h4b_"+branch)
-
-    c=ROOT.TCanvas(branchfit+bins+cut, branch+" "+cut,700,int((500*1.2)))
-
-
-    rPad = ROOT.TPad("ratio", "ratio", 0, 0.0, 1, 0.3)
-    ROOT.gPad.SetTicks(1,1)
-    rPad.SetBottomMargin(0.30)
-    rPad.SetTopMargin(0.035)
-    rPad.SetRightMargin(0.03)
-    rPad.SetFillStyle(0)
-    rPad.Draw()
-
-    hPad = ROOT.TPad("hist",  "hist",  0, 0.3, 1, 1.0)
-    ROOT.gPad.SetTicks(1,1)
-    hPad.SetBottomMargin(0.02)
-    hPad.SetTopMargin(0.05)
-    hPad.SetRightMargin(0.03)
-    #hPad.SetLogx()
-    ####hPad.SetLogy()
-    hPad.Draw()
-
-    hPad.SetFillStyle(0)
-    ROOT.gStyle.SetPadTickX(1)
-    ROOT.gStyle.SetPadTickY(1)
-    ROOT.gROOT.ForceStyle()
-
-    setStyle(h2b)
-    
-    #h2b.SetTitle(branch+" "+cut)
-    h2b.SetTitle("")
-    h2b.SetFillColor(ROOT.kYellow)
-
-
-    h4b.SetLineColor(ROOT.kBlack)
-    setStyle(h4b)
-
-    
-
-    h2b.GetYaxis().SetTitle("Entries")
-    h4b.GetYaxis().SetTitle("Entries")
-
-
-    if norm:
-        normHist(h2b)
-        normHist(h4b)
-
-    print("Fit normalization: ", h2b.Integral())
-    print("True normalization: ", h4b.Integral())
-    #print("Fit/True normalizaation: ", h2b.Integral()/h4b.Integral())
-
-    max4b = h4b.GetMaximum()
-    max2b = h2b.GetMaximum()
-    hMax = max(max2b, max4b)*1.1
-    h2b.SetMaximum(hMax)
-    h4b.SetMaximum(hMax)
-
-
-    ratio = ROOT.TH1F(h4b).Clone()
-    ratio.GetXaxis().SetLabelSize(0)
-    ratio.SetTitle("")
-    ratio.GetYaxis().SetNdivisions(503)
-    ratio.SetName(h4b.GetName().replace("h4b","h4bOver2b"))
-    ratio.SetStats(0)
-
-    ratio.Divide(h2b)
-
-    if method == "benchmark":
-        ratio.SetYTitle("4b/3b")
-
-    else:
-        ratio.SetYTitle("Data/Bkg")
-
-    ratio.SetMinimum(ratio_min)
-    ratio.SetMaximum(ratio_max)
-    ratio.SetXTitle(xAxisTitle)
-    setStyle(ratio)
-
-    #ratio.GetXaxis().SetLabelSize(30)
-    ratio.GetXaxis().SetLabelSize(0.1)
-    ratio.GetXaxis().SetLabelOffset(0)
-
-    ratio.GetYaxis().SetLabelOffset(0.015)
-    ratio.GetYaxis().SetTitleOffset(1.1 )
-    ratio.GetXaxis().SetTitleSize(25)
-
-
-    hPad.cd()
-    h2b.Draw("HIST")
-    h4b.Draw("ex0 PE SAME")
-    #h4b.Draw("ex0 PE SAME")
-    #h4b.Draw("ex0 axis SAME")
-
-    #hPad.RedrawAxis()
-
-    rPad.cd()
-    ratio.Draw("x0 P P0 SAME")
-
-    ratio.SetMarkerStyle(20)
-    ratio.SetMarkerSize(0.5)
-
-    one = ROOT.TF1("one","1",ratio.GetXaxis().GetXmin(),ratio.GetXaxis().GetXmax())
-    one.SetLineColor(ROOT.kBlack)
-    one.SetLineWidth(1)
-    one.DrawCopy("same l")
-
-    hPad.Update()
-
-    
-    hPad.cd()
-    l=ROOT.TLegend(0.7,0.7,0.9,0.9)
-    l.SetBorderSize(0)
-    l.SetFillColor(0)
-    l.SetFillStyle(0)
-    l.SetTextAlign(12)
-    l.AddEntry(h4b, "4b Data", "lp")
-
-    if method != "benchmark":
-        l.AddEntry(h2b, "Bkg Model", "f")
-
-    else:
-        l.AddEntry(h2b, "3b Data", "f")
-
-    l.Draw()
-    
-    region = cut.replace("==1","")
-    region = "Signal"    if region == "SR" else region
-    region = "Control"   if region == "CR" else region
-    region = "Side-band" if region == "SB" else region
-
-    titleRegion  = ROOT.TLatex(0.75, 0.96, "#bf{"+region+" Region}")
-    titleRegion.SetTextAlign(11)
-    titleRegion.SetNDC()
-    titleRegion.Draw()
-
-    if method != "benchmark":
-        print(method)
-        if method == "resnet":
-            method_name = "HH-FvT"
-
-        elif method[:10] == "horizontal":
-            if len(method) > 10:
-                method_name = "HH-OT, K = " + str(method[12:])
-
-            else:
-                method_name = "HH-OT"
-
-        elif method == "resnet_transport":
-            method_name = "HH-Comb"
-
-        else:
-            method_name = method
-    
-        titleMethod  = ROOT.TLatex(0.1, 0.96, "#bf{Background Method: "+method_name+"}")
-
-        titleMethod.SetTextAlign(11)
-        titleMethod.SetNDC()
-        titleMethod.Draw()
-
-
-        hPad.Update()
-
-        return c, ratio,l, [titleRegion, titleMethod]
-
-    hPad.Update()
-
-    return c, ratio,l, titleRegion
-
-def plot_production(t4b, t4b_large, sig, sig2, sig3, t2b, branch, bins, cut, plot_scalars=False, fit_vs_fit=False, weights=True, canvas=None, norm=False, branchfit=None, xAxisTitle="", method="", ratio_min=0.5, ratio_max=1.5):
+def plot_production(t4b, t4b_large, sig, t2b, branch, bins, cut, plot_scalars=False, weights=True, canvas=None, norm=False, branchfit=None, xAxisTitle="", method="", method_name="", ratio_min=0.5, ratio_max=1.5):
     if branchfit is None:
         branchfit = branch
 
@@ -261,7 +75,7 @@ def plot_production(t4b, t4b_large, sig, sig2, sig3, t2b, branch, bins, cut, plo
     t2b.Draw(branchfit+">>h2b_"+branchfit+bins,"weight*("+cut+")")  #(29038/28017)*
     h2b = ROOT.gDirectory.Get("h2b_"+branchfit)
 
-    t2b.Draw(branchfit+">>hraw_"+branchfit+bins, str(pi_34) + "*("+cut+")")  #(29038/28017)*
+    t2b.Draw(branchfit+">>hraw_"+branchfit+bins, "w_" + method_name + "*("+cut+")")  #(29038/28017)*
     hraw = ROOT.gDirectory.Get("hraw_"+branchfit)
 
     t4b.Draw(branch+">>h4b_"+branch+bins,"weight*("+cut+")")
@@ -273,15 +87,7 @@ def plot_production(t4b, t4b_large, sig, sig2, sig3, t2b, branch, bins, cut, plo
     sig.Draw(branch+">>hsig_"+branch+bins,"weight*("+cut+")")
     hsig = ROOT.gDirectory.Get("hsig_"+branch)
 
-    sig2.Draw(branch+">>hsig2_"+branch+bins,"weight*("+cut+")")
-    hsig2 = ROOT.gDirectory.Get("hsig2_"+branch)
-
-    sig3.Draw(branch+">>hsig3_"+branch+bins,"weight*("+cut+")")
-    hsig3 = ROOT.gDirectory.Get("hsig3_"+branch)
-
-
     c=ROOT.TCanvas(branchfit+bins+cut, branch+" "+cut,700,int((500*1.2)))
-
 
     rPad = ROOT.TPad("ratio", "ratio", 0, 0.0, 1, 0.3)
     ROOT.gPad.SetTicks(1,1)
@@ -334,16 +140,6 @@ def plot_production(t4b, t4b_large, sig, sig2, sig3, t2b, branch, bins, cut, plo
     hsig.SetLineWidth(3)
     hsig.SetLineStyle(7)        
 
-    setStyle(hsig2)
-    hsig2.SetLineColor(ROOT.kRed)
-    hsig2.SetLineWidth(3)
-    hsig2.SetLineStyle(7)        
-
-    setStyle(hsig3)
-    hsig3.SetLineColor(12)
-    hsig3.SetLineWidth(3)
-    hsig3.SetLineStyle(7)        
-
     h2b.GetYaxis().SetTitle("Entries")
     h4b.GetYaxis().SetTitle("Entries")
 
@@ -353,8 +149,6 @@ def plot_production(t4b, t4b_large, sig, sig2, sig3, t2b, branch, bins, cut, plo
         normHist(hraw)
         normHist(h4bL) 
         normHist(hsig)
-        normHist(hsig2)
-        normHist(hsig3)
 
 
     print("Fit normalization: ", h2b.Integral())
@@ -405,10 +199,6 @@ def plot_production(t4b, t4b_large, sig, sig2, sig3, t2b, branch, bins, cut, plo
     h4bL.Draw("ex0 PE SAME")
     hsig.Draw("HIST SAME")
 
-    if plot_scalars:
-        hsig2.Draw("HIST SAME")
-        hsig3.Draw("HIST SAME")
-
     rPad.cd()
     ratio.Draw("x0 P P0 SAME")
 
@@ -432,10 +222,6 @@ def plot_production(t4b, t4b_large, sig, sig2, sig3, t2b, branch, bins, cut, plo
     l.AddEntry(h4b, "4b Data", "lp")
     l.AddEntry(h4bL, "4b (x10) Data", "lp")
     l.AddEntry(hsig, "SM HH", "l")
-
-    if plot_scalars:
-        l.AddEntry(hsig2, "Scalar (270 GeV)", "l")
-        l.AddEntry(hsig3, "Scalar (280 GeV)", "l")
 
     if method != "benchmark":
         l.AddEntry(h2b, "Bkg Model", "f")
