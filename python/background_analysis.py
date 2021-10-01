@@ -266,13 +266,19 @@ if data == "MG3":
 
 def get_method_name(method):
     if method == "HH-OT":
-        return method + "-pl_" + pl_id + "-K_" + str(K)
+        return "HH_OT__pl_" + pl_id + "__K_" + str(K)
 
-    if method == "HH-FvT" or method == "HH-RF":
-        return method + "-cl_" + cl_id 
+    if method == "HH-FvT":
+        return "HH_FvT__cl_" + cl_id 
 
-    if method == "HH-Comb-FvT" or method == "HH-Comb-RF":
-        return method + "-pl_" + pl_id + "-cl_" + cl_id 
+    if method == "HH-RF":
+        return "HH_RF__cl_" + cl_id 
+
+    if method == "HH-Comb-FvT":
+        return "HH_Comb_FvT__pl_" + pl_id + "__cl_" + cl_id 
+
+    if method == "HH-Comb-RF":
+        return "HH_Comb_RF__pl_" + pl_id + "__cl_" + cl_id 
 
     return method
 
@@ -345,30 +351,28 @@ if not fit:
             sys.exit("Existing fit for method " + method + " not found. Try using the -f switch to fit the method.")
 
 else: 
+    sys.path.insert(0, 'methods')
+
     if method == "benchmark":
         print("Starting Benchmark.")
-        sys.path.insert(0, "methods/benchmark")
         import benchmark
 
         benchmark.benchmark(bbbj_tree, bbbb_tree, out_path)
  
     elif method == "HH-Comb-FvT":
         print("Starting HH-Comb-FvT fit.")
-        sys.path.insert(0, 'methods/combination')
-        import resnet_transport
+        import combination
 
-        resnet_transport.resnet_large_transport(bbbj_tree_SR, df3b, df4b, classifier_path, out_path, coupling_path, I_source, I_target, source=source, fvt=True)
+        combination.resnet_large_transport(bbbj_tree, bbbb_tree,out_path, method_name, coupling_path, I_source, I_target, source=source, fvt=True)
 
     elif method == "HH-Comb-RF":
         print("Starting HH-Comb-FvT fit.")
-        sys.path.insert(0, 'methods/combination')
         import resnet_transport
 
         resnet_transport.resnet_large_transport(bbbj_tree_SR, df3b, df4b, classifier_path, out_path, coupling_path, I_source, I_target, source=source, fvt=False)
 
     elif method == "HH-RF":
         print("Starting FvT fit from control region.")
-        sys.path.insert(0, 'methods/classifier')
         import evaluate_classifier
 
         evaluate_classifier.fit(bbbj=bbbj_tree, bbbb=bbbb_tree, df3b=df3b, df4b=df4b, fvt=False, 
@@ -376,23 +380,21 @@ else:
  
     elif method == "HH-FvT":
         print("Starting FvT fit from control region.")
-        sys.path.insert(0, 'methods/classifier')
         import evaluate_classifier
 
-        evaluate_classifier.fit(bbbj=bbbj_tree, bbbb=bbbb_tree, df3b=df3b, df4b=df4b, classifier_path=classifier_path, 
+        evaluate_classifier.fit(bbbj=bbbj_tree, bbbb=bbbb_tree, method_name=method_name, 
                                        out_path=out_path, source=source, target=target, lrInit=lrInit, 
                                        train_batch_size=train_batch_size, num_params=num_params, fvt=True)
  
     elif method == "HH-OT":
         print("Starting horizontal transport fit.")
-        sys.path.insert(0, 'methods/horizontal')
-        import horizontal_transport
+        import nn_transport
 
-        horizontal_transport.horizontal_large_transport(
-            bbbj_SR=bbbj_tree_SR, 
-            out_path=out_path, 
-            n_CR3b=bbbj_tree_CR.GetEntries(), 
-            n_CR4b=bbbb_tree_CR.GetEntries(), 
+        nn_transport.nn_large_transport(
+            bbbj=bbbj_tree,
+            bbbb=bbbb_tree, 
+            out_path=out_path,
+            method_name=method_name, 
             K=K, R=R, coupling_path=coupling_path, 
             distance_path=distance_path,
             I_CR3b_hp=I_CR3b_hp,
