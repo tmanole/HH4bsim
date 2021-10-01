@@ -42,7 +42,7 @@ def normHist(hist):
         print("normHist integral is zero:",hist.GetName())
     hist.GetYaxis().SetTitle("Normalized Entries")
 
-def plot_production(t4b, t4b_large, sig, t2b, branch, bins, cut, plot_scalars=False, weights=True, canvas=None, norm=False, branchfit=None, xAxisTitle="", method="", method_name="", ratio_min=0.5, ratio_max=1.5):
+def plot_production(t4b, t4b_large, sig, t2b, branch, bins, cut, log_scale=False, plot_scalars=False, weights=True, canvas=None, norm=False, branchfit=None, xAxisTitle="", method="", method_name="", ratio_min=0.5, ratio_max=1.5):
     if branchfit is None:
         branchfit = branch
 
@@ -72,10 +72,10 @@ def plot_production(t4b, t4b_large, sig, t2b, branch, bins, cut, plot_scalars=Fa
     pi_34 = t4b.GetEntries() * 1.0 / t2b.GetEntries()
     
 
-    t2b.Draw(branchfit+">>h2b_"+branchfit+bins,"weight*("+cut+")")  #(29038/28017)*
+    t2b.Draw(branchfit+">>h2b_"+branchfit+bins, "w_" + method_name + "*("+cut+")")  #(29038/28017)*
     h2b = ROOT.gDirectory.Get("h2b_"+branchfit)
 
-    t2b.Draw(branchfit+">>hraw_"+branchfit+bins, "w_" + method_name + "*("+cut+")")  #(29038/28017)*
+    t2b.Draw(branchfit+">>hraw_"+branchfit+bins,"weight*("+cut+")")  #(29038/28017)*
     hraw = ROOT.gDirectory.Get("hraw_"+branchfit)
 
     t4b.Draw(branch+">>h4b_"+branch+bins,"weight*("+cut+")")
@@ -103,7 +103,10 @@ def plot_production(t4b, t4b_large, sig, t2b, branch, bins, cut, plot_scalars=Fa
     hPad.SetTopMargin(0.05)
     hPad.SetRightMargin(0.03)
     #hPad.SetLogx()
-    ####hPad.SetLogy()
+    
+    if log_scale:
+        hPad.SetLogy()
+
     hPad.Draw()
 
     hPad.SetFillStyle(0)

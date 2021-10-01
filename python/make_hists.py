@@ -103,22 +103,24 @@ def fit_plots(tree_true, tree_true_large, tree_sig_HH4b, tree_fit, SvB=True, mHH
         normalizations = ["unnormalized"]
 
     else:
-        normalizations = ["unnormalized", "normalized"]
+        normalizations = ["normalized","unnormalized"]
 
     for norm in [False,True]:
-       for region in regions:
-            for i in range(len(variables)):
-                print(region + "==1")
-                print("SvB Full Plot")
-                print(variables[i])#&&SvB_SR_4b>0.95     &&SvB_SR_4b<0.2
+        for do_log in [False,True]:
+            for region in regions:
+                for i in range(len(variables)):
+                    print(region + "==1")
+                    print("SvB Full Plot")
+                    print(variables[i])#&&SvB_SR_4b>0.95     &&SvB_SR_4b<0.2
 
-                c,r,l,o=plotting.plot_production(tree_true, tree_true_large, tree_sig_HH4b,tree_fit, variables[i], bins[i], region + "==1", norm = norm, xAxisTitle=x_titles[i],method=method, method_name=method_name)
-                c.Draw()
+                    c,r,l,o=plotting.plot_production(tree_true, tree_true_large, tree_sig_HH4b,tree_fit, variables[i], bins[i], region + "==1", log_scale=do_log, norm = norm, xAxisTitle=x_titles[i],method=method, method_name=method_name)
+                    c.Draw()
 
-                outpath = "../results/" + data + "/" + method_name + "/plots/" + ("normalized" if norm else "unnormalized") + "/" + region 
-                pathlib.Path(outpath).mkdir(parents=True, exist_ok=True) 
+                    outpath = "../results/" + data + "/" + method_name + "/plots/" + ("log_" if do_log else "") + ("normalized" if norm else "unnormalized") + "/" + region
+#                    outpath = "../results/" + data + "/" + method_name + "/plots/" + ("normalized" if norm else "unnormalized") + "/" + region 
+                    pathlib.Path(outpath).mkdir(parents=True, exist_ok=True) 
 
-                c.SaveAs(outpath + "/" + out_names[i] + ".pdf")
+                    c.SaveAs(outpath + "/" + out_names[i] + ".pdf")
 
 ##    if reweight:
 ##        for normalization in normalizations:
