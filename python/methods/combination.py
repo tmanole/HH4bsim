@@ -1,12 +1,10 @@
 import ROOT
 from array import array
+import numpy as np
 import sys
 sys.path.insert(0, "../")
 
-import pandas as pd
-import numpy as np
-
-import matplotlib.pyplot as plt
+from get_norm import get_norm
 
 def resnet_transport_fit(bbbj_tree, df3b, df4b, classifier_path, coupling_cr_path, coupling_sr_path, out_path, bs=3):
 
@@ -58,7 +56,7 @@ def resnet_transport_fit(bbbj_tree, df3b, df4b, classifier_path, coupling_cr_pat
 
 
 def resnet_large_transport(bbbj, bbbb, out_path, method_name, 
-                           coupling_path, 
+                           coupling_CR_path, coupling_SR_path,
                            I_CR_path="../../../couplings/MG2/ordering_sT/I_CR3b.npy", 
                            I_SR_path="../../../couplings/MG2/ordering_sT/I_SR3b.npy", 
                            source="CR", N_low=0, N_high=16, bs=3, fvt=True, lrInit=0.01, train_batch_size=256, 
@@ -69,8 +67,10 @@ def resnet_large_transport(bbbj, bbbb, out_path, method_name,
         "Source" and "target" are reversed from the usual notation. Source is typically SR3b, 
         and target is typically CR3b, for example.
     """
-
-    bid = str(bs) + "b"
+    
+    # Setup
+    w3b_CR_sum, w3b_SR_sum, w4b_CR_sum = get_norm(bbbj, bbbb)
+    pi = w4b_CR_sum / w3b_CR_sum
 
     I_CR = np.load(I_CR_path).astype(int)
     I_SR = np.load(I_SR_path).astype(int)
@@ -78,8 +78,7 @@ def resnet_large_transport(bbbj, bbbb, out_path, method_name,
     n = I_CR.shape[0]
     m = I_SR.shape[0]
 
-    weights = []
-
+    # Create fit tree
     out_file = ROOT.TFile(out_path, "RECREATE") 
     fit = bbbj.CloneTree(0)
 
@@ -89,9 +88,7 @@ def resnet_large_transport(bbbj, bbbb, out_path, method_name,
     w = array('f',[0])
     fit.SetBranchAddress('w_'+method_name, w)
 
-    weight_vec = []
-    w_sum = 0
-
+    # Get classifier weights
     full_h = []
 
     for i in range(bbbj.GetEntries()):
@@ -102,45 +99,9 @@ def resnet_large_transport(bbbj, bbbb, out_path, method_name,
 
     full_h=np.array(full_h)
 
-###    if fvt:
-###        sys.path.insert(0, "../../fvt_scripts/")
-###        from model_train import modelParameters
-###
-###        for i in bbbj.GetEntries():
-###            bbbj.GetEntry(i)
-###
-###            if bbbj.SR == 1:
-###                full_h.append(bbbj.FvT)
-###
-####        model = modelParameters(df3b[df3b[source]], df4b[df4b[source]], fileName=classifier_path, lrInit=lrInit, train_batch_size=train_batch_size, num_params=num_params)
-####
-####        h1, _  = model.predict(df3b[df3b[source]])
-####        full_h      = h1[:,1]
-###
-###
-    w3b_CR_sum = 0.0
-    w3b_SR_sum = 0.0
-    w4b_CR_sum = 0.0
-
-    for i in range(bbbj.GetEntries()):
-        bbbj.GetEntry(i)
-
-        if bbbj.CR == 1:
-            w3b_CR_sum += bbbj.weight
-
-    for i in range(bbbj.GetEntries()):
-        bbbj.GetEntry(i)
-
-        if bbbj.SR == 1:
-            w3b_SR_sum += bbbj.weight
-
-    for i in range(bbbb.GetEntries()):
-        bbbb.GetEntry(i)
-
-        if bbbb.CR == 1:
-            w4b_CR_sum += bbbb.weight
-
-    pi = w4b_CR_sum/w3b_CR_sum
+    # Create HH-Comb-FvT weights
+    weight_vec_CR = []
+    weight_vec_SR = []
 
     for j in range(N_low, N_high+1):
 
@@ -149,47 +110,56 @@ def resnet_large_transport(bbbj, bbbb, out_path, method_name,
         ind = I_CR[:, j].reshape([n,1]).squeeze().tolist()
         h = full_h[ind]
 
-        coupling = np.load(coupling_path + str(j) + ".npy")        
-        coupling /= np.sum(coupling)
+        coupling_CR = np.load(coupling_CR_path + str(j) + ".npy")        
+        #coupling_CR /= np.sum(coupling_CR)
+
+        coupling_SR = np.load(coupling_SR_path + str(j) + ".npy")        
+        #coupling_SR /= np.sum(coupling_SR)
    
-        print(coupling.shape)
-        print(np.matmul((h/(1-h))/(np.sum(coupling, axis=1)), coupling).shape)
-        print(np.sum(coupling, axis=1).shape)
+        print(coupling_CR.shape)
+        print(coupling_SR.shape)
+#        print(np.matmul((h/(1-h))/(np.sum(coupling, axis=1)), coupling).shape)
 
-        weights= pi * np.matmul(h/(1-h), coupling)/ (N_high-N_low+1)
-        #weights=pi * np.matmul((h/(1-h))/(np.sum(coupling, axis=1)), coupling)/ (N_high-N_low+1)   
-        #weights = np.sum(df3b['SR']) * pi * np.matmul(coupling, h/(1-h)) / (N_high-N_low+1)
+        weights_CR = pi * np.matmul(h/(1-h), coupling_CR)/ (N_high-N_low+1)
+        weights_SR = pi * np.matmul(h/(1-h), coupling_SR)/ (N_high-N_low+1)
+        # Notice that `coupling` is implicitly normalized by its first marginal
+        # and h/(1-h) is implicitly multiplied by this same quantity. 
 
-        print(np.sum(h/(1-h)))
-        print("weight sum: ", np.sum(weights))
-        print("coupling sum: ", np.sum(coupling))
-        print("fvt sum: ", np.sum(pi*h/(1-h)))
-        w_sum += np.sum(weights)
+#        print(np.sum(h/(1-h)))
+#        print("weight sum: ", np.sum(weights))
+#        print("coupling sum: ", np.sum(coupling))
+#        print("fvt sum: ", np.sum(pi*h/(1-h)))
 
-        weight_vec.append(weights)
+        weight_vec_CR.append(weights_CR)
+        weight_vec_SR.append(weights_SR)
 
-        print(weights)
-
-    print("FINAL WEIGHT SUM: ", w_sum)
-    print("FINAL WEIGHT SIZE: ", np.array(weight_vec).shape)
-
-#    n1 = np.sum(df3b[df3b['SR']]['weight'])
-#    m = np.sum(df4b[df4b['CR']]['weight'])
-#    r = np.sum(df3b[df3b['CR']]['weight'])
-
-    out_weights = np.repeat(0, bbbj.GetEntries()).tolist()
+    out_weights_CR = np.repeat(0, bbbj.GetEntries()).tolist()
+    out_weights_SR = np.repeat(0, bbbj.GetEntries()).tolist()
     
     for j in range(N_low, N_high+1):
         for i in range(I_SR.shape[0]):
-            out_weights[I_SR[i,j]] = weight_vec[j][i] * w3b_SR_sum #n1 * m / r #(w_sum * r)
+            out_weights_SR[I_SR[i,j]] = weight_vec_SR[j][i] * w3b_SR_sum #n1 * m / r #(w_sum * r)
+
+        for i in range(I_CR.shape[0]):
+            out_weights_CR[I_CR[i,j]] = weight_vec_CR[j][i] * w3b_CR_sum #n1 * m / r #(w_sum * r)
+
+    # Populate final tree
     
-    o = 0
+    j_CR = 0
+    j_SR = 0
     for i in range(bbbj.GetEntries()):
         bbbj.GetEntry(i)
 
         if bbbj.SR == 1:
-            w[0] = out_weights[o]
-            o += 1
+            w[0] = out_weights_SR[j_SR]
+            j_SR += 1
+
+        elif bbbj.CR == 1:
+            w[0] = out_weights_CR[j_CR]
+            j_CR += 1
+
+        else:
+            w[0] = 0
 
         fit.Fill()
 
