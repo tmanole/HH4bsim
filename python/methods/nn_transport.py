@@ -8,7 +8,7 @@ import sys
 sys.path.insert(0, "../../transport_scripts/")
 sys.path.insert(0, "../../")
 
-from kernelized_transport import transport
+#from kernelized_transport import transport
 from sklearn.neighbors import NearestNeighbors
 
 from get_norm import get_norm
@@ -17,7 +17,8 @@ def nn_large_transport(bbbj,
                                bbbb,
                                out_path,
                                method_name,
-                               coupling_path="../couplings/MG2/CR3b_SR3b/R0_4/coupling_block",
+                               coupling_CR_path,
+                               coupling_SR_path,
                                distance_path="../distances/MG2/emd_opt4/nn_CR3b_CR4b/tblock",
                                I_CR3b_hp="../couplings/MG2/ordering_sT/CR3b_SR3b/I_CR3b.npy",
                                I_SR3b_hp="../couplings/MG2/ordering_sT/CR3b_SR3b/I_SR3b.npy",
@@ -95,6 +96,10 @@ def nn_large_transport(bbbj,
                 overlap_4b = I_CR4b_vert[0:200 , j].tolist()
                 overlap_3b = I_CR3b_vert[0:1500, j].tolist()
 
+            if j < N_high_vert:
+                overlap_4b = I_CR4b_vert[-200:-1 , j].tolist()
+                overlap_3b = I_CR3b_vert[-1500:-1, j].tolist()
+
             for i in range(idx.shape[0]):         
 
                 temp_weights = np.zeros(K)
@@ -127,8 +132,10 @@ def nn_large_transport(bbbj,
     print("Step 2: Starting horizontal transport.")
     print("============================================")
 
-    weights = []
-    wsum = 0
+    weights_CR = []
+    weights_SR = []
+    wsum_CR = 0
+    wsum_SR = 0
 
     for j in range(N_low_horiz, N_high_horiz+1):
 
@@ -136,37 +143,57 @@ def nn_large_transport(bbbj,
 
         ind_CR = I_CR3b_horiz[:, j].reshape([nh,1]).squeeze().tolist()
 
-        coupling = np.load(coupling_path + str(j) + ".npy").transpose()
+        coupling_SR = np.load(coupling_SR_path + str(j) + ".npy").transpose()
+        coupling_CR = np.load(coupling_CR_path + str(j) + ".npy").transpose()
 
-        normalize_marginal = np.diag(1.0/np.sum(coupling, axis=0))
-        coupling =  np.matmul(coupling, normalize_marginal)
+        normalize_CR_marginal = np.diag(1.0/np.sum(coupling_CR, axis=0))
+        coupling_CR = np.matmul(coupling_CR, normalize_CR_marginal)
 
-        weights.append(np.matmul(coupling, nn_weights[ind_CR]))
-        wsum += np.sum(weights[-1]) 
+        normalize_SR_marginal = np.diag(1.0/np.sum(coupling_SR, axis=0))
+        coupling_SR = np.matmul(coupling_SR, normalize_SR_marginal)
 
-        print(weights[-1])
-        print(np.unique(weights[-1]))
-        print(np.sum(weights[-1] != 0)/weights[-1].size) 
-        print(np.max(weights[-1])) 
-        print("Number of zeroes: ", np.sum(weights[-1] == 0))
+        weights_CR.append(np.matmul(coupling_CR, nn_weights[ind_CR]))
+        wsum_CR += np.sum(weights_CR[-1]) 
 
-    out_weights = np.repeat(0, bbbj.GetEntries()).tolist()
+        weights_SR.append(np.matmul(coupling_SR, nn_weights[ind_CR]))
+        wsum_SR += np.sum(weights_SR[-1]) 
+
+        print(weights_SR[-1])
+        print(np.unique(weights_SR[-1]))
+        print(np.sum(weights_SR[-1] != 0)/weights_SR[-1].size) 
+        print(np.max(weights_SR[-1])) 
+        print("Number of zeroes: ", np.sum(weights_SR[-1] == 0))
+
+    out_weights_CR = np.repeat(0, bbbj.GetEntries()).tolist()
+    out_weights_SR = np.repeat(0, bbbj.GetEntries()).tolist()
 
     for j in range(N_low_horiz, N_high_horiz+1):
-        weights[j] = weights[j] * w3b_SR_sum *pi_factor/wsum
+        weights_CR[j] = weights_CR[j] * w3b_CR_sum * pi_factor/wsum_CR
+        weights_SR[j] = weights_SR[j] * w3b_SR_sum * pi_factor/wsum_SR
+
+        ind_CR = I_CR3b_horiz[:, j].reshape([nh,1]).squeeze().tolist()
+
+        for i in range(len(ind_CR)):
+            out_weights_CR[ind_CR[i]] = weights_CR[j][i]
+
         ind_SR = I_SR3b_horiz[:, j].reshape([mh,1]).squeeze().tolist()
 
         for i in range(len(ind_SR)):
-            out_weights[ind_SR[i]] = weights[j][i]
+            out_weights_SR[ind_SR[i]] = weights_SR[j][i]
 
+    i_CR = 0
     i_SR = 0
     for i in range(bbbj.GetEntries()):
         bbbj.GetEntry(i)
 
         if bbbj.SR == 1:
-            w[0] = out_weights[i_SR]
+            w[0] = out_weights_SR[i_SR]
             i_SR += 1
 
+        elif bbbj.CR == 1:
+            w[0] = out_weights_CR[i_CR]
+            i_CR += 1
+        
         else:
             w[0] = 0
 
