@@ -277,7 +277,7 @@ def plot_production(t4b, t4b_large, sig, t2b, branch, bins, cut, log_scale=False
 
     return c, ratio,l, titleRegion
 
-def plot_summary(t4b, t2b1, t2b2, t2b3, sig, branch, bins, cut='SR==1', plot_scalars=False, canvas=None, log_scale=False, norm=False, branchfit=None, xAxisTitle="", method="", hist_file=None, save_root_hists=False):
+def plot_summary(t4b, t3b, sig, branch, bins, cut='SR==1', plot_scalars=False, canvas=None, log_scale=False, norm=False, branchfit=None, xAxisTitle="", method="", hist_file=None, save_root_hists=True):
     if branchfit is None:
         branchfit = branch
 
@@ -304,27 +304,36 @@ def plot_summary(t4b, t2b1, t2b2, t2b3, sig, branch, bins, cut='SR==1', plot_sca
         h2b2  = ROOT.TH1F('h2b2_' +branchfit, '', len(bins)-1, bins)
         h2b3  = ROOT.TH1F('h2b3_' +branchfit, '', len(bins)-1, bins)
         h4b   = ROOT.TH1F('h4b_'  +branch,    '', len(bins)-1, bins)
-        hsig = ROOT.TH1F('hsig_'+branch,    '', len(bins)-1, bins)
+        hsig1 = ROOT.TH1F('hsig1_'+branch,    '', len(bins)-1, bins)
         bins = ''
         h4b.SetDirectory(tdir)
 
-    t2b1.Draw(branchfit+">>h2b_"  +branchfit+bins, str(scale_3b)  + "*weight*("+cut+")/reweight")
-    t2b1.Draw(branchfit+">>h2b1_" +branchfit+bins, str(scale_fit) + "*weight*("+cut+")")
-    t2b2.Draw(branchfit+">>h2b2_" +branchfit+bins, str(scale_fit) + "*weight*("+cut+")")
-    t2b3.Draw(branchfit+">>h2b3_" +branchfit+bins, str(scale_fit) + "*weight*("+cut+")")
-    t4b .Draw(branch   +">>h4b_"  +branch   +bins, str(scale_4b)  + "*weight*("+cut+")")
-    sig.Draw(branch   +">>hsig_"+branch   +bins, str(pi)        + "*weight*("+cut+")")
+#    t2b1.Draw(branchfit+">>h2b_"  +branchfit+bins, str(scale_3b)  + "*weight*("+cut+")/reweight")
+#    t2b1.Draw(branchfit+">>h2b1_" +branchfit+bins, str(scale_fit) + "*weight*("+cut+")")
+#    t2b2.Draw(branchfit+">>h2b2_" +branchfit+bins, str(scale_fit) + "*weight*("+cut+")")
+#    t2b3.Draw(branchfit+">>h2b3_" +branchfit+bins, str(scale_fit) + "*weight*("+cut+")")
+#    t4b .Draw(branch   +">>h4b_"  +branch   +bins, str(scale_4b)  + "*weight*("+cut+")")
+#    sig.Draw(branch   +">>hsig_"+branch   +bins, str(pi)        + "*weight*("+cut+")")
+
+    t3b.Draw(branchfit+">>h2b_"  +branchfit+bins, str(scale_3b)  + "*weight*("+cut+")")
+    t3b.Draw(branchfit+">>h2b1_" +branchfit+bins, str(scale_fit) + "*w_HH_FvT__cl_np799_l0_01_e10*("+cut+")")
+    t3b.Draw(branchfit+">>h2b2_" +branchfit+bins, str(scale_fit) + "*w_HH_Comb_FvT__pl_emd_p1_R0_4__cl_np799_l0_01_e10*("+cut+")")
+    t3b.Draw(branchfit+">>h2b3_" +branchfit+bins, str(scale_fit) + "*w_HH_OT__pl_emd_p1_R0_4__K_1*("+cut+")")
+    t4b.Draw(branch   +">>h4b_"  +branch   +bins, str(scale_4b)  + "*weight*("+cut+")")
+    sig.Draw(branch   +">>hsig1_"+branch   +bins, str(pi)         + "*weight*("+cut+")")
 
     h2b   = ROOT.gDirectory.Get("h2b_"  +branchfit)
     h2b1  = ROOT.gDirectory.Get("h2b1_" +branchfit)
     h2b2  = ROOT.gDirectory.Get("h2b2_" +branchfit)
     h2b3  = ROOT.gDirectory.Get("h2b3_" +branchfit)
     h4b   = ROOT.gDirectory.Get("h4b_"  +branch)
-    hsig = ROOT.gDirectory.Get("hsig_"+branch)
+    hsig1 = ROOT.gDirectory.Get("hsig1_"+branch)
 
     try:
-        hsig.Scale(sig_fraction * h4b.Integral()/hsig.Integral()) # this method only works for normalizing the signal in the SR where every event is included in the correspoding hist exactly once!!! 
+        hsig1.Scale(sig_fraction * h4b.Integral()/hsig1.Integral()) # this method only works for normalizing the signal in the SR where every event is included in the correspoding hist exactly once!!! 
+        print("Normalize signal")
     except:
+        print("Error!")
         pass
 
     # try:
@@ -357,7 +366,7 @@ def plot_summary(t4b, t2b1, t2b2, t2b3, sig, branch, bins, cut='SR==1', plot_sca
         hist_file.Append(h2b2)
         hist_file.Append(h2b3)
         hist_file.Append(h4b)
-        hist_file.Append(hsig)
+        hist_file.Append(hsig1)
 
     try:
         if not h4b.InheritsFrom("TH1"): return
@@ -436,10 +445,10 @@ def plot_summary(t4b, t2b1, t2b2, t2b3, sig, branch, bins, cut='SR==1', plot_sca
         h.SetMaximum(max_height)
         print(h.Integral())
     
-    setStyle(hsig)
-    hsig.SetLineColor(ROOT.kBlue)
-    hsig.SetLineWidth(3)
-    hsig.SetLineStyle(7)
+    setStyle(hsig1)
+    hsig1.SetLineColor(ROOT.kBlue)
+    hsig1.SetLineWidth(3)
+    hsig1.SetLineStyle(7)
 
     if plot_scalars:
         setStyle(hsig2)
@@ -524,7 +533,7 @@ def plot_summary(t4b, t2b1, t2b2, t2b3, sig, branch, bins, cut='SR==1', plot_sca
     h2b3.Draw("HIST SAME")
     h4b.Draw("ex0 SAME")
 
-    hsig.Draw("HIST SAME")
+    hsig1.Draw("HIST SAME")
 
     if plot_scalars:
         hsig2.Draw("HIST SAME")
@@ -563,7 +572,7 @@ def plot_summary(t4b, t2b1, t2b2, t2b3, sig, branch, bins, cut='SR==1', plot_sca
     l.AddEntry(h2b1, "HH-FvT", "l")
     l.AddEntry(h2b2, "HH-Comb", "l")
     l.AddEntry(h2b3, "HH-OT (K=1)", "l")
-    l.AddEntry(hsig, "SM HH", "l")
+    l.AddEntry(hsig1, "SM HH", "l")
 
     if plot_scalars:
         l.AddEntry(hsig2, "Scalar (270 GeV)", "l")

@@ -1,6 +1,9 @@
-import ROOT
-import time
 import sys
+import ROOT
+
+ROOT.gROOT.SetBatch(ROOT.kTRUE)
+
+import time
 from make_hists import *
 import pathlib
 import pandas as pd
@@ -223,6 +226,8 @@ if data == "MG3":
 
     else:
         coupling_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG3/CR3b_SR3b/R0_4/coupling_block"
+        coupling_CR_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG3/CR3b_CR3b/R0_4/coupling_block"
+        coupling_SR_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG3/CR3b_SR3b/R0_4/coupling_block"
 
 # Other MG2 couplings. 
 #        coupling_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG2/emd_opt4/CR3b_SR3b/oracle_R0_4_p1_clean/coupling"            # This is upsample 4b map, balanced.
@@ -245,7 +250,7 @@ if data == "MG3":
         pass 
 
     else:
-        distance_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/distances/MG3/tblock"
+        distance_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/distances/MG3/CR3b_CR4b/tblock"
 
         I_CR3b_hp="../couplings/MG3/ordering_sT/CR3b_SR3b/I_MG3_CR3b.npy"
         I_SR3b_hp="../couplings/MG3/ordering_sT/CR3b_SR3b/I_MG3_SR3b.npy"
@@ -303,7 +308,7 @@ bid = "bbjj" if bs == 2 else "bbbj"
 bb  = str(bs) + "b"
 
 print("Loading TTrees.")
-if args.plot or args.fit or args.updateweights:
+if args.plot or args.sumplot or args.fit or args.updateweights:
     ### ROOT TFiles
     bbbb_file = ROOT.TFile(aux_dir + "events/" + data + "/TTree/bbbb.root", "READ")
     bbbj_file = ROOT.TFile(aux_dir + "events/" + data + "/TTree/" + bid + ".root", "READ")
@@ -363,13 +368,13 @@ else:
         print("Starting HH-Comb-FvT fit.")
         import combination
 
-        combination.resnet_large_transport(bbbj_tree, bbbb_tree,out_path, method_name, coupling_path, I_source, I_target, source=source, fvt=True)
+        combination.resnet_large_transport(bbbj_tree, bbbb_tree,out_path, method_name, coupling_CR_path, coupling_SR_path, I_source, I_target, source=source, fvt=True)
 
     elif method == "HH-Comb-RF":
         print("Starting HH-Comb-FvT fit.")
         import resnet_transport
 
-        resnet_transport.resnet_large_transport(bbbj_tree_SR, df3b, df4b, classifier_path, out_path, coupling_path, I_source, I_target, source=source, fvt=False)
+        resnet_transport.resnet_large_transport(bbbj_tree_SR, df3b, df4b, classifier_path, out_path, coupling_CR_path, coupling_SR_path, I_source, I_target, source=source, fvt=False)
 
     elif method == "HH-RF":
         print("Starting FvT fit from control region.")
@@ -395,7 +400,9 @@ else:
             bbbb=bbbb_tree, 
             out_path=out_path,
             method_name=method_name, 
-            K=K, R=R, coupling_path=coupling_path, 
+            K=K, R=R, 
+            coupling_CR_path=coupling_CR_path, 
+            coupling_SR_path=coupling_SR_path, 
             distance_path=distance_path,
             I_CR3b_hp=I_CR3b_hp,
             I_SR3b_hp=I_SR3b_hp,
@@ -488,6 +495,30 @@ if plotting: # or args.validation:
 
     # Next step: Merge this step with make_summary_hists below. Use these updated trees therein. 
     #   
+
+    if args.sumplot:
+        #methods = ["HH-FvT", "HH-Comb-FvT", "HH-OT"]
+        #method_names = [get_method_name(m) for m in methods]
+        #out_paths = ["../results/" + data + "/plot_trees/" + m + ".root" for m in method_names]
+        #print(out_paths)
+
+        #tfiles = [ROOT.TFile(o, "READ") for o in out_paths]
+        #ttrees = [f.Get("Tree") for f in tfiles]
+
+
+        hist_file = '../results/%s/summary/hists.root'%data
+        hist_file = ROOT.TFile(hist_file, 'RECREATE')
+
+
+        make_summary_hists(
+                    bbbb_large_tree, bbbj_tree, 
+                    sig_HH4b_tree,
+                   data=data, hist_file=hist_file
+                  )
+
+        hist_file.Write()
+        hist_file.Close()
+
 
 """
     if args.sumplot:
