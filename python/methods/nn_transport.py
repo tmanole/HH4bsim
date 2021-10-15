@@ -29,7 +29,7 @@ def nn_large_transport(bbbj,
                                N_low_horiz=0, 
                                N_low_vert=0, 
                                N_high_horiz=16,
-                               N_high_vert=11, 
+                               N_high_vert=33, 
                                bs=3, K=1, R0=2*np.pi, R=2):
 
     """ Transport from SR to CR in large dataset and apply FvT classifier. 
@@ -57,11 +57,16 @@ def nn_large_transport(bbbj,
     I_CR3b_vert = np.load(I_CR3b_vp).astype(int)
     I_CR4b_vert = np.load(I_CR4b_vp).astype(int)
 
+    print("C3 c4 shape   ", I_CR3b_vert.shape, I_CR4b_vert.shape)
+
     nh = I_CR3b_horiz.shape[0]
     mh = I_SR3b_horiz.shape[0]
 
     nv = I_CR3b_vert.shape[0]
     mv = I_CR4b_vert.shape[0]
+
+    overlap3b = 3551#int(nv/(N_high_vert+1))
+    overlap4b = 484#int(mv/(N_high_vert+1))
 
     nn_weights = np.zeros(bbbj.GetEntries())
     
@@ -84,44 +89,47 @@ def nn_large_transport(bbbj,
         if R != R0:
             P = np.load(sT_vp + str(j) + ".npy").transpose()
 
+            print(P.shape, D.shape)
+
             D = (R0 * D/R) + ((R - R0) * P / R)
 
-        if nearest_neighbor:
-            idx = np.argsort(D, axis=1)[:, :K]
+        idx = np.argsort(D, axis=1)[:, :K]
+        print(np.max(idx))
+        print("Dshape: ", D.shape)
+        print(idx.shape)
+        overlap_4b = []
+        overlap_3b = []
 
-            overlap_4b = []
-            overlap_3b = []
+        if j > 0:
+            overlap_4b = I_CR4b_vert[0:overlap4b, j].tolist()
+            overlap_3b = I_CR3b_vert[0:overlap3b, j].tolist()
 
-            if j > 0:
-                overlap_4b = I_CR4b_vert[0:200 , j].tolist()
-                overlap_3b = I_CR3b_vert[0:1500, j].tolist()
+        if j < N_high_vert:
+            overlap_4b = I_CR4b_vert[-overlap4b:-1, j].tolist()
+            overlap_3b = I_CR3b_vert[-overlap3b:-1, j].tolist()
 
-            if j < N_high_vert:
-                overlap_4b = I_CR4b_vert[-200:-1 , j].tolist()
-                overlap_3b = I_CR3b_vert[-1500:-1, j].tolist()
+        for i in range(idx.shape[0]):         
 
-            for i in range(idx.shape[0]):         
+            temp_weights = np.zeros(K)
+            
+            inds = I_CR3b_vert[idx[i, 0:K], j]
+            s = 0
 
-                temp_weights = np.zeros(K)
-                
-                inds = I_CR3b_vert[idx[i, 0:K], j]
-                s = 0
+            for l in range(K):                    
+                if i in overlap_4b or inds[l] in overlap_3b:
+                    temp_weights[l] = 2*D[i,idx[i,l]]
 
-                for l in range(K):                    
-                    if i in overlap_4b or inds[l] in overlap_3b:
-                        temp_weights[l] = 2*D[i,idx[i,l]]
+                else:
+                    temp_weights[l] = D[i,idx[i,l]]
+              
+            s = np.sum(temp_weights)
+            temp_weights = s/temp_weights              
+            temp_weights /= np.sum(temp_weights)
 
-                    else:
-                        temp_weights[l] = D[i,idx[i,l]]
-                  
-                s = np.sum(temp_weights)
-                temp_weights = s/temp_weights              
-                temp_weights /= np.sum(temp_weights)
-
-                for l in range(K):                                      
-                    nn_weights[inds[l]] += temp_weights[l] 
-                    if nn_weights[inds[l]] > 25:
-                        print("Exceeded 25 nearest neighbor hits: ", nn_weights[inds[l]], "inds: ", inds[l], ", ", idx[i,0])
+            for l in range(K):                                      
+                nn_weights[inds[l]] += temp_weights[l] 
+                if nn_weights[inds[l]] > 25:
+                    print("Exceeded 25 nearest neighbor hits: ", nn_weights[inds[l]], "inds: ", inds[l], ", ", idx[i,0])
 
 #    print(nn_weights)
 #    print(np.unique(nn_weights))
@@ -162,7 +170,7 @@ def nn_large_transport(bbbj,
         print(np.unique(weights_SR[-1]))
         print(np.sum(weights_SR[-1] != 0)/weights_SR[-1].size) 
         print(np.max(weights_SR[-1])) 
-        print("Number of zeroes: ", np.sum(weights_SR[-1] == 0))
+        print("Number of zeros: ", np.sum(weights_SR[-1] == 0))
 
     out_weights_CR = np.repeat(0, bbbj.GetEntries()).tolist()
     out_weights_SR = np.repeat(0, bbbj.GetEntries()).tolist()
