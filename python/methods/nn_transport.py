@@ -14,23 +14,23 @@ from sklearn.neighbors import NearestNeighbors
 from get_norm import get_norm
 
 def nn_large_transport(bbbj,
-                               bbbb,
-                               out_path,
-                               method_name,
-                               coupling_CR_path,
-                               coupling_SR_path,
-                               distance_path="../distances/MG2/emd_opt4/nn_CR3b_CR4b/tblock",
-                               I_CR3b_hp="../couplings/MG2/ordering_sT/CR3b_SR3b/I_CR3b.npy",
-                               I_SR3b_hp="../couplings/MG2/ordering_sT/CR3b_SR3b/I_SR3b.npy",
-                               I_CR3b_vp="../distances/MG2/emd_opt4/nn_CR3b_CR4b/I_nn_CR3b.npy",#"../couplings/MG2/ordering_sT/CR3b_CR4b/I_CR3b.npy",
-                               I_CR4b_vp="../distances/MG2/emd_opt4/nn_CR3b_CR4b/I_nn_CR4b.npy",#"../couplings/MG2/ordering_sT/CR3b_CR4b/I_CR4b.npy",
-                               sT_vp="/media/tudor/Seagate Portable Drive/Seagate/LHC/distances/MG3/CR3b_CR4b/sT/sT",
-                               nn_sliding_sT=True,
-                               N_low_horiz=0, 
-                               N_low_vert=0, 
-                               N_high_horiz=16,
-                               N_high_vert=33, 
-                               bs=3, K=1, R0=2*np.pi, R=2):
+                       bbbb,
+                       out_path,
+                       method_name,
+                       coupling_CR_path,
+                       coupling_SR_path,
+                       distance_path="../distances/MG2/emd_opt4/nn_CR3b_CR4b/tblock",
+                       I_CR3b_hp="../couplings/MG2/ordering_sT/CR3b_SR3b/I_CR3b.npy",
+                       I_SR3b_hp="../couplings/MG2/ordering_sT/CR3b_SR3b/I_SR3b.npy",
+                       I_CR3b_vp="../distances/MG2/emd_opt4/nn_CR3b_CR4b/I_nn_CR3b.npy",#"../couplings/MG2/ordering_sT/CR3b_CR4b/I_CR3b.npy",
+                       I_CR4b_vp="../distances/MG2/emd_opt4/nn_CR3b_CR4b/I_nn_CR4b.npy",#"../couplings/MG2/ordering_sT/CR3b_CR4b/I_CR4b.npy",
+                       sT_vp="/media/tudor/Seagate Portable Drive/Seagate/LHC/distances/MG3/CR3b_CR4b/sT/sT",
+                       nn_sliding_sT=True,
+                       N_low_horiz=0, 
+                       N_low_vert=0, 
+                       N_high_horiz=16,
+                       N_high_vert=33, 
+                       bs=3, K=1, R0=2*np.pi, R=2):
 
     """ Transport from SR to CR in large dataset and apply FvT classifier. 
     
@@ -81,9 +81,11 @@ def nn_large_transport(bbbj,
     print("Step 1: Starting NN lookup.")
     print("============================================")
 
+    full_inv_dists = np.zeros((16940, 124285), dtype=np.float32)  ## This is a very large matrix. 
+
+
     for j in range(N_low_vert, N_high_vert+1):
         print("block " + str(j))
-
         D = np.load(distance_path + str(j) + ".npy").transpose()
 
         if R != R0:
@@ -93,47 +95,57 @@ def nn_large_transport(bbbj,
 
             D = (R0 * D/R) + ((R - R0) * P / R)
 
-        idx = np.argsort(D, axis=1)[:, :K]
-        print(np.max(idx))
-        print("Dshape: ", D.shape)
-        print(idx.shape)
-        overlap_4b = []
-        overlap_3b = []
+        print("Check: ", full_inv_dists[j*overlap4b:(j+1)*overlap4b, j*overlap3b:(j+1)*overlap3b] == 1.0/D)
+        print("overlap:   ", ((j+2)*overlap4b) - (j*overlap4b))
+        print(D.shape)
+        print(full_inv_dists[(j*overlap4b):((j+2)*overlap4b), (j*overlap3b):((j+2)*overlap3b)].shape)
+        full_inv_dists[(j*overlap4b):((j+2)*overlap4b), (j*overlap3b):((j+2)*overlap3b)] = 1.0/D
 
-        if j > 0:
-            overlap_4b = I_CR4b_vert[0:overlap4b, j].tolist()
-            overlap_3b = I_CR3b_vert[0:overlap3b, j].tolist()
+    D = 0 
+    P = 0
 
-        if j < N_high_vert:
-            overlap_4b = I_CR4b_vert[-overlap4b:-1, j].tolist()
-            overlap_3b = I_CR3b_vert[-overlap3b:-1, j].tolist()
+    flattened_inds = I_CR3b_vert.flatten("F")
+   
+    flat_inds = np.empty(124285, dtype=np.int)
+    for j in range(N_low_vert, N_high_vert+1):
+        flat_inds[j*overlap3b: (j+1)*overlap3b] = flattened_inds[2*j*overlap3b: (2*j+1)*overlap3b]
+        print((2*j+1)*overlap3b/flattened_inds.size)
 
-        for i in range(idx.shape[0]):         
+    j = N_high_vert
+    flat_inds[(j+1)*overlap3b:] = flattened_inds[(2*j+1)*overlap3b:]
 
-            temp_weights = np.zeros(K)
-            
-            inds = I_CR3b_vert[idx[i, 0:K], j]
-            s = 0
+    print(flat_inds)
+    print(flat_inds.size)
+    print(flattened_inds.size)
+#    sys.exit()
+    idx = np.argsort(-full_inv_dists, axis=1)[:, :K]
 
-            for l in range(K):                    
-                if i in overlap_4b or inds[l] in overlap_3b:
-                    temp_weights[l] = 2*D[i,idx[i,l]]
+    print("exist sorting")
 
-                else:
-                    temp_weights[l] = D[i,idx[i,l]]
+
+    for i in range(idx.shape[0]):         
+
+        if i % 1000 == 0:
+            print(i)
+
+            #temp_weights = np.zeros(K)
+        temp_weights = full_inv_dists[i,idx[i,:]]
+
+        inds = flat_inds[idx[i, 0:K]]
               
-            s = np.sum(temp_weights)
-            temp_weights = s/temp_weights              
-            temp_weights /= np.sum(temp_weights)
+        temp_weights /= np.sum(temp_weights)
 
-            for l in range(K):                                      
-                nn_weights[inds[l]] += temp_weights[l] 
-                if nn_weights[inds[l]] > 25:
-                    print("Exceeded 25 nearest neighbor hits: ", nn_weights[inds[l]], "inds: ", inds[l], ", ", idx[i,0])
+        for l in range(K):                                      
+            nn_weights[inds[l]] += temp_weights[l] 
+#                if nn_weights[inds[l]] > 25:
+#                    print("Exceeded 25 nearest neighbor hits: ", nn_weights[inds[l]], "inds: ", inds[l], ", ", idx[i,0])
+        
+        if np.max(inds) > 124285:
+            print("Exceeded CR3b indexing")
 
-#    print(nn_weights)
-#    print(np.unique(nn_weights))
-#    print(np.sum(nn_weights != 0)) 
+    print(nn_weights)
+    print(np.unique(nn_weights))
+    print(np.sum(nn_weights != 0)) 
 #    print(np.sum(nn_weights != 0)/N) 
 
     print("============================================")
