@@ -17,10 +17,11 @@ import argparse
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('-d', '--data', default='MG3', type=str, help='Nickname for dataset to use.')
 parser.add_argument('-m', '--method', default='', type=str, help='Name of method to use.')
+parser.add_argument('-f', '--fit', default=False, type=bool, help='Fit the method?')
 parser.add_argument('-p', '--plot', default=False, type=bool, help='Produce plots?')
 parser.add_argument('-v', '--validation', default=False, type=bool, help='Run a classifier to compare fit to SR4b?')
-parser.add_argument('-f', '--fit', default=False, type=bool, help='Fit the method?')
 parser.add_argument('-sp', '--sumplot', default=False, type=bool, help='Produce summary plots?')
+parser.add_argument('-rh', '--redohists', default=False, type=bool, help='Remake base hists?')
 parser.add_argument('-uw', '--updateweights', default=False, type=bool, help='Update SvB and FvT weights?')
 parser.add_argument('-cl', '--cl', default="np799_lr0_01_e29", type=str, help='Classifier nickname.')
 parser.add_argument('-cp', '--cp', default="", type=str, help='Classifier path.')
@@ -43,7 +44,7 @@ method = args.method
 fit    = args.fit
 K      = args.K
 R      = args.R
-#p_ot   = args.pot
+rh     = args.redohists
 
 lrInit           = args.lrInit
 train_batch_size = args.trbatchsize
@@ -350,6 +351,22 @@ if args.make_univariate_hists:
     make_dijet_masses(bbbb_tree, region='SR', four_tag='4b', data=data)
 
 
+### Update hists
+hist_dir  = '../results/%s/hists/'%data
+hist_path = hist_dir + 'hists.root'
+if rh:
+    pathlib.Path(hist_dir).mkdir(parents=True, exist_ok=True) 
+
+    hist_file = ROOT.TFile(hist_path, 'UPDATE')
+
+    base_hist_setup(bbbb_tree, bbbb_large_tree, sig_HH4b_tree, hist_file)
+
+    hist_file.Write()
+    hist_file.Close()
+
+
+
+
 ### Update SvB Weights
 
 ##### Call fns under SvB dir
@@ -431,6 +448,8 @@ else:
     
     bbbj_file.Close()
 
+
+    ## Update weights in bbbj
     fit_file = ROOT.TFile(out_path, "READ")
     fit_tree = fit_file.Get("Tree")
     
@@ -439,6 +458,13 @@ else:
     bbbj_file.Write()
     fit_file.Close()
 
+    ## Update hist files
+    hist_file = ROOT.TFile(hist_path, 'UPDATE')
+
+    make_base_hist(bbbj_tree, "w_" + method_name, hist_file, "h_"+method_name)
+
+    hist_file.Write()
+    hist_file.Close()
 
 
 plotting = args.plot or args.sumplot
@@ -485,24 +511,17 @@ if plotting: # or args.validation:
 
     if args.plot:
 
-        hist_file = '../results/%s/testing/hists.root'%data
-        hist_file = ROOT.TFile(hist_file, 'UPDATE')
+        if rh:
+            hist_file = ROOT.TFile(hist_path, 'UPDATE')
 
-        base_hist_setup(bbbb_tree, bbbb_large_tree, sig_HH4b_tree, hist_file)
-        make_base_hist(bbbj_tree, "w_" + method_name, hist_file, "h_"+method_name)
+            make_base_hist(bbbj_tree, "w_" + method_name, hist_file, "h_"+method_name)
 
-        hist_file.Write()
-        hist_file.Close()
+            hist_file.Write()
+            hist_file.Close()
 
-        hist_file = '../results/%s/testing/hists.root'%data
-        hist_file = ROOT.TFile(hist_file, 'READ')
+        hist_file = ROOT.TFile(hist_path, 'READ')
 
         make_fit_hists(bbbj_tree, hist_file, method_name)
-#        make_summary_hists(
-#                    bbbb_large_tree, bbbj_tree, 
-#                    sig_HH4b_tree,
-#                   data=data, hist_file=hist_file
-#                  )
 
         hist_file.Write()
         hist_file.Close()
@@ -543,19 +562,22 @@ if plotting: # or args.validation:
         #tfiles = [ROOT.TFile(o, "READ") for o in out_paths]
         #ttrees = [f.Get("Tree") for f in tfiles]
 
+        if rh:
+            hist_file = ROOT.TFile(hist_path, 'UPDATE')
 
-        hist_file = '../results/%s/testing/hists.root'%data
-        hist_file = ROOT.TFile(hist_file, 'RECREATE')
+            hh_ot   = "HH_OT__pl_emd_p1_R0_4__K_1"
+            hh_comb = "HH_Comb_FvT__pl_emd_p1_R0_4__cl_np799_l0_01_e10"
+            hh_fvt  = "HH_FvT__cl_np799_l0_01_e10"
+        
+            make_base_hist(bbbj_tree, "w_" + hh_ot, hist_file, "h_"+hh_ot)
+            make_base_hist(bbbj_tree, "w_" + hh_comb, hist_file, "h_"+hh_comb)
+            make_base_hist(bbbj_tree, "w_" + hh_fvt, hist_file, "h_"+hh_fvt)
+            make_base_hist(bbbj_tree, "w_benchmark", hist_file, "h_benchmark")
 
-        base_hist_setup(bbbb_tree, bbbb_large_tree, sig_HH4b_tree, hist_file)
-        #make_base_hist(bbbj_tree, "w_" + method_name, hist_file, "h_"+method_name)
+            hist_file.Write()
+            hist_file.Close()
 
-        hist_file.Write()
-        hist_file.Close()
-
-        hist_file = '../results/%s/testing/hists.root'%data
-        hist_file = ROOT.TFile(hist_file, 'UPDATE')
-
+        hist_file = ROOT.TFile(hist_path, 'READ')
 
         make_summary_hists(
         #            bbbb_large_tree, 

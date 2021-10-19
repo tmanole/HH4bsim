@@ -225,23 +225,21 @@ def base_hist_setup(tree_true, tree_true_large, tree_sig, hist_file):
     hist_file.Close()
 
 def make_fit_hists(tree_fit, hist_file, method_name):
-    make_base_hist(tree_fit, "w_" + method_name, hist_file, "h_"+method_name)
+#    make_base_hist(tree_fit, "w_" + method_name, hist_file, "h_"+method_name)
     plot_vars, _, x_titles, _ = get_plotting_vars()
     plotting.plot_fit_hists(hist_file, method_name=method_name, plot_vars=plot_vars, x_titles=x_titles, norm=True) 
     plotting.plot_fit_hists(hist_file, method_name=method_name, plot_vars=plot_vars, x_titles=x_titles, norm=False) 
 
 def make_summary_hists(tree_fit, hist_file):
-    hh_ot   = "HH_OT__pl_emd_p1_R0_4__K_1"
-    hh_comb = "HH_Comb_FvT__pl_emd_p1_R0_4__cl_np799_l0_01_e10"
-    hh_fvt  = "HH_FvT__cl_np799_l0_01_e10"        
+#    hh_ot   = "HH_OT__pl_emd_p1_R0_4__K_1"
+#    hh_comb = "HH_Comb_FvT__pl_emd_p1_R0_4__cl_np799_l0_01_e10"
+#    hh_fvt  = "HH_FvT__cl_np799_l0_01_e10"        
+#
+#    make_base_hist(tree_fit, "w_" + hh_ot, hist_file, "h_"+hh_ot)
+#    make_base_hist(tree_fit, "w_" + hh_comb, hist_file, "h_"+hh_comb)
+#    make_base_hist(tree_fit, "w_" + hh_fvt, hist_file, "h_"+hh_fvt)
+#    make_base_hist(tree_fit, "w_benchmark", hist_file, "h_benchmark")
 
-    print("!!!")
-    make_base_hist(tree_fit, "w_" + hh_ot, hist_file, "h_"+hh_ot)
-    print("@@@")
-    make_base_hist(tree_fit, "w_" + hh_comb, hist_file, "h_"+hh_comb)
-    print("###")
-    make_base_hist(tree_fit, "w_" + hh_fvt, hist_file, "h_"+hh_fvt)
-    make_base_hist(tree_fit, "w_benchmark", hist_file, "h_benchmark")
     plot_vars, _, x_titles, _ = get_plotting_vars()
     plotting.plot_fit_hists(hist_file, method_name=None, plot_vars=plot_vars, x_titles=x_titles, norm=True)
     plotting.plot_fit_hists(hist_file, method_name=None, plot_vars=plot_vars, x_titles=x_titles, norm=False) 
