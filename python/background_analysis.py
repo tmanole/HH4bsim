@@ -59,7 +59,9 @@ source = "CR"
 target = ["SR"]
 
 
-aux_dir = "../"#"/media/tudor/Seagate Portable Drive/Seagate/LHC/"
+aux_dir       = "../"#"/media/tudor/Seagate Portable Drive/Seagate/LHC/"
+aux_dir_large = "/media/tmanole/Seagate Portable Drive/Seagate/LHC/"
+#aux_dir_large = "/media/tudor/Seagate Portable Drive/Seagate/LHC/"
 
 ### Available Datasets (-d).
 #
@@ -192,42 +194,42 @@ else:
 
 if data == "MG2":
     if pl_id == "emd_p1_R0_4":
-        coupling_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG2/emd_opt4/CR3b_SR3b/R0_4/coupling_block"
+        coupling_path = aux_dir_large + "couplings/MG2/emd_opt4/CR3b_SR3b/R0_4/coupling_block"
     
     elif pl_id == "emd_p1_R1":
-        coupling_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG2/emd_opt4/CR3b_SR3b/R1/coupling_block"
+        coupling_path = aux_dir_large + "couplings/MG2/emd_opt4/CR3b_SR3b/R1/coupling_block"
     
     elif pl_id == "emd_p1_R2":
-        coupling_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG2/emd_opt4/CR3b_SR3b/R2/coupling_block"
+        coupling_path = aux_dir_large + "couplings/MG2/emd_opt4/CR3b_SR3b/R2/coupling_block"
     
     elif pl_id == "emd_p2_R2":
         coupling_path = "/media/tudor/USB20FD/couplings/p2/R2/coupling_block"
     
     elif pl_id == "sqeucl":
-        coupling_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG2/euclidean/CR3b_SR3b/coupling_block"
+        coupling_path = aux_dir_large + "couplings/MG2/euclidean/CR3b_SR3b/coupling_block"
         R = 2 * np.pi
     
     else:
         print("The optimal transport coupling " + pl_id + " was not found. Revert to default")
-        coupling_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG2/CR3b_SR3b/R0_4/coupling_block"
+        coupling_path = aux_dir_large + "couplings/MG2/CR3b_SR3b/R0_4/coupling_block"
 
 if data == "MG3":
     if pl_id == "conditional_p1_R0_4":
-        coupling_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG3/conditional/R0_4/coupling_CRSR_block"
+        coupling_path = aux_dir_large + "couplings/MG3/conditional/R0_4/coupling_CRSR_block"
 
     elif pl_id == "unbalanced_p1_R0_4_tau200_lambda10":
-        coupling_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG3/CR3b_SR3b/R0_4/unbalanced_tau200_lambda10/unbalanced"
+        coupling_path = auxs_dir_large + "couplings/MG3/CR3b_SR3b/R0_4/unbalanced_tau200_lambda10/unbalanced"
 
     elif pl_id == "unbalanced_sT_p1_R0_4_tau200_lambda10":
-        coupling_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG3/CR3b_SR3b/R0_4/unbalanced_sT_tau200_lambda10/unbalanced"
+        coupling_path = aux_dir_large + "couplings/MG3/CR3b_SR3b/R0_4/unbalanced_sT_tau200_lambda10/unbalanced"
 
     elif pl_id == "unbalanced_p1_R0_4":
-        coupling_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG3/CR3b_SR3b/R0_4/unbalanced/unbalanced"
+        coupling_path = aux_dir_large + "couplings/MG3/CR3b_SR3b/R0_4/unbalanced/unbalanced"
 
     else:
-        coupling_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG3/CR3b_SR3b/R0_4/coupling_block"
-        coupling_CR_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG3/CR3b_CR3b/R0_4/coupling_block"
-        coupling_SR_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG3/CR3b_SR3b/R0_4/coupling_block"
+        coupling_path    = aux_dir_large + "couplings/MG3/CR3b_SR3b/R0_4/coupling_block"
+        coupling_CR_path = aux_dir_large + "couplings/MG3/CR3b_CR3b/R0_4/coupling_block"
+        coupling_SR_path = aux_dir_large + "couplings/MG3/CR3b_SR3b/R0_4/coupling_block"
 
 # Other MG2 couplings. 
 #        coupling_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/couplings/MG2/emd_opt4/CR3b_SR3b/oracle_R0_4_p1_clean/coupling"            # This is upsample 4b map, balanced.
@@ -241,7 +243,7 @@ if data == "MG3":
 
 if data == "MG2":
     if pl_id == "sqeucl":
-        distance_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/distances/MG2/nn_euclidean_CR3b_CR4b/tblock"
+        distance_path = aux_dir_large + "distances/MG2/nn_euclidean_CR3b_CR4b/tblock"
     else:
         distance_path = aux_dir + "distances/MG2/emd_opt4/nn_CR3b_CR4b/tblock"
 
@@ -250,12 +252,24 @@ if data == "MG3":
         pass 
 
     else:
-        distance_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/distances/MG3/CR3b_CR4b/tblock"
+#        distance_path = aux_dir_large + "distances/MG3/CR3b_CR4b/tblock"
+
+#        I_CR3b_hp="../couplings/MG3/ordering_sT/CR3b_SR3b/I_MG3_CR3b.npy"
+#        I_SR3b_hp="../couplings/MG3/ordering_sT/CR3b_SR3b/I_MG3_SR3b.npy"
+#        I_CR3b_vp="../distances/MG3/nn_inds/I_nn_CR3b.npy"
+#        I_CR4b_vp="../distances/MG3/nn_inds/I_nn_CR4b.npy"
+
+        #distance_path = "/media/tudor/Seagate Portable Drive/Seagate/LHC/distances/MG3/CR3b_CR4b_halfstep/tblock"
+        distance_path = "../distances/MG3/CR3b_CR4b_halfstep/tblock"
+
+        #sT_path = aux_dir_large + "distances/MG3/CR3b_CR4b/sT/sT"
+        sT_path = "../distances/MG3/CR3b_CR4b_halfstep/sT/sT"
 
         I_CR3b_hp="../couplings/MG3/ordering_sT/CR3b_SR3b/I_MG3_CR3b.npy"
         I_SR3b_hp="../couplings/MG3/ordering_sT/CR3b_SR3b/I_MG3_SR3b.npy"
-        I_CR3b_vp="../distances/MG3/nn_inds/I_nn_CR3b.npy"
-        I_CR4b_vp="../distances/MG3/nn_inds/I_nn_CR4b.npy"
+        I_CR4b_vp="../distances/MG3/nn_inds/I_nn_MG3_CR3b_halfstep.npy"
+        I_CR3b_vp="../distances/MG3/nn_inds/I_nn_MG3_CR4b_halfstep.npy"
+
 
 ###  Block Index Dictionary (for OT)
 if data == "MG2":
@@ -352,7 +366,7 @@ if args.make_univariate_hists:
 ### Start fit.
 if not fit:
 
-    if (args.plot or args.validation) and not os.path.exists(out_path):
+    if False:#(args.plot or args.validation) and not os.path.exists(out_path):
             sys.exit("Existing fit for method " + method + " not found. Try using the -f switch to fit the method.")
 
 else: 
@@ -404,6 +418,7 @@ else:
             coupling_CR_path=coupling_CR_path, 
             coupling_SR_path=coupling_SR_path, 
             distance_path=distance_path,
+            sT_vp=sT_path,
             I_CR3b_hp=I_CR3b_hp,
             I_SR3b_hp=I_SR3b_hp,
             I_CR3b_vp=I_CR3b_vp,
@@ -469,6 +484,29 @@ if plotting: # or args.validation:
 #    tree_sig_HH4b_weighted = file_sig1.Get("Tree")
 
     if args.plot:
+
+        hist_file = '../results/%s/testing/hists.root'%data
+        hist_file = ROOT.TFile(hist_file, 'UPDATE')
+
+        base_hist_setup(bbbb_tree, bbbb_large_tree, sig_HH4b_tree, hist_file)
+        make_base_hist(bbbj_tree, "w_" + method_name, hist_file, "h_"+method_name)
+
+        hist_file.Write()
+        hist_file.Close()
+
+        hist_file = '../results/%s/testing/hists.root'%data
+        hist_file = ROOT.TFile(hist_file, 'READ')
+
+        make_fit_hists(bbbj_tree, hist_file, method_name)
+#        make_summary_hists(
+#                    bbbb_large_tree, bbbj_tree, 
+#                    sig_HH4b_tree,
+#                   data=data, hist_file=hist_file
+#                  )
+
+        hist_file.Write()
+        hist_file.Close()
+
 #        file_fit =        ROOT.TFile(plot_tree_path + tree_names[-1] + ".root", "READ")
 #        tree_fit = file_fit.Get("Tree")
 
@@ -479,18 +517,18 @@ if plotting: # or args.validation:
 #        else:
 #            tree_true_reweight = False
 #
-        fit_plots(tree_true=bbbb_tree,
-                  tree_true_large=bbbb_large_tree,
-                  tree_sig_HH4b=sig_HH4b_tree,
-                  tree_fit=bbbj_tree,
-                  SvB=True,
-                  mHH = mHH,
-                  reweight=plot_reweight_distr,
-                  data=data,
-                  method_name=method_name,
-                  method=method,
-                  regions=target,
-                  fromnp=False)
+##        fit_plots(tree_true=bbbb_tree,
+##                  tree_true_large=bbbb_large_tree,
+##                  tree_sig_HH4b=sig_HH4b_tree,
+##                  tree_fit=bbbj_tree,
+##                  SvB=True,
+##                  mHH = mHH,
+##                  reweight=plot_reweight_distr,
+##                  data=data,
+##                  method_name=method_name,
+##                  method=method,
+##                  regions=target,
+##                  fromnp=False)
 
 
     # Next step: Merge this step with make_summary_hists below. Use these updated trees therein. 
@@ -506,14 +544,25 @@ if plotting: # or args.validation:
         #ttrees = [f.Get("Tree") for f in tfiles]
 
 
-        hist_file = '../results/%s/summary/hists.root'%data
+        hist_file = '../results/%s/testing/hists.root'%data
         hist_file = ROOT.TFile(hist_file, 'RECREATE')
+
+        base_hist_setup(bbbb_tree, bbbb_large_tree, sig_HH4b_tree, hist_file)
+        #make_base_hist(bbbj_tree, "w_" + method_name, hist_file, "h_"+method_name)
+
+        hist_file.Write()
+        hist_file.Close()
+
+        hist_file = '../results/%s/testing/hists.root'%data
+        hist_file = ROOT.TFile(hist_file, 'UPDATE')
 
 
         make_summary_hists(
-                    bbbb_large_tree, bbbj_tree, 
-                    sig_HH4b_tree,
-                   data=data, hist_file=hist_file
+        #            bbbb_large_tree, 
+        bbbj_tree, 
+        #            sig_HH4b_tree,
+        #           data=data, 
+        hist_file=hist_file
                   )
 
         hist_file.Write()

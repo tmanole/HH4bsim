@@ -56,9 +56,9 @@ def get_plotting_vars():
 
     x_titles = ["Four-jet mass [GeV]", 
                 "mHH [GeV]",
-                "#Delta R_{jj} (Close di-jet pair)", 
-                "#Delta R_{jj} (Other di-jet pair)", 
-                "< |#eta| >",
+                "\Delta R_{jj} (Close di-jet pair)", 
+                "\Delta R_{jj} (Other di-jet pair)", 
+                "< |\eta| >",
                 "jetPt_{0} (Transverse momentum of first jet)",
                 "jetPt_{1} (Transverse momentum of second jet)",
                 "jetPt_{2} (Transverse momentum of second jet)",
@@ -225,12 +225,26 @@ def base_hist_setup(tree_true, tree_true_large, tree_sig, hist_file):
     hist_file.Close()
 
 def make_fit_hists(tree_fit, hist_file, method_name):
-#    make_base_hist(tree_fit, "w_" + method_name, hist_file, "h_"+method_name)
-    plotting.plot_fit_hists(hist_file, method_name=method_name, norm=True) 
-    plotting.plot_fit_hists(hist_file, method_name=method_name, norm=False) 
+    make_base_hist(tree_fit, "w_" + method_name, hist_file, "h_"+method_name)
+    plot_vars, _, x_titles, _ = get_plotting_vars()
+    plotting.plot_fit_hists(hist_file, method_name=method_name, plot_vars=plot_vars, x_titles=x_titles, norm=True) 
+    plotting.plot_fit_hists(hist_file, method_name=method_name, plot_vars=plot_vars, x_titles=x_titles, norm=False) 
 
-def make_summary_hists():
-    pass
+def make_summary_hists(tree_fit, hist_file):
+    hh_ot   = "HH_OT__pl_emd_p1_R0_4__K_1"
+    hh_comb = "HH_Comb_FvT__pl_emd_p1_R0_4__cl_np799_l0_01_e10"
+    hh_fvt  = "HH_FvT__cl_np799_l0_01_e10"        
+
+    print("!!!")
+    make_base_hist(tree_fit, "w_" + hh_ot, hist_file, "h_"+hh_ot)
+    print("@@@")
+    make_base_hist(tree_fit, "w_" + hh_comb, hist_file, "h_"+hh_comb)
+    print("###")
+    make_base_hist(tree_fit, "w_" + hh_fvt, hist_file, "h_"+hh_fvt)
+    make_base_hist(tree_fit, "w_benchmark", hist_file, "h_benchmark")
+    plot_vars, _, x_titles, _ = get_plotting_vars()
+    plotting.plot_fit_hists(hist_file, method_name=None, plot_vars=plot_vars, x_titles=x_titles, norm=True)
+    plotting.plot_fit_hists(hist_file, method_name=None, plot_vars=plot_vars, x_titles=x_titles, norm=False) 
 
 
 def fit_plots(tree_true, tree_true_large, tree_sig_HH4b, tree_fit, SvB=True, mHH=True, reweight=False, data="MG3", method_name="benchmark", method="benchmark", regions=["SR", "CR", "SB"], fromnp=True, signal=False):
@@ -319,7 +333,7 @@ def make_dijet_masses(tree, region, four_tag, data="MG2_small", fromnp=False):
     c.Draw()
     c.SaveAs("../results/eda/" + data + "/" + four_tag + "/" + region + "/dijet_mass.pdf")
 
-
+"""
 def make_summary_hists(true_tree, bbbj_tree, sig_tree, data, regions=["SR"], mHH=True, SvB=True, hist_file=None):
 #
 #            pathlib.Path(sum_path).mkdir(parents=True, exist_ok=True) 
@@ -365,3 +379,5 @@ def make_summary_hists(true_tree, bbbj_tree, sig_tree, data, regions=["SR"], mHH
                     c.SaveAs(sum_path + out_names[i] + ".pdf")
 
 
+
+"""
