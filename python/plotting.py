@@ -347,7 +347,7 @@ class variable:
         # self.mu_qcd = mu_qcd
 
 
-def plot_fit_hists(hist_file, method_name, plot_vars, x_titles, norm=False):
+def plot_fit_hists(hist_file, method, method_name, plot_vars, x_titles, norm=False):
     pi_4 = 0.0998996846167015
 
     class standardPlot:
@@ -359,31 +359,28 @@ def plot_fit_hists(hist_file, method_name, plot_vars, x_titles, norm=False):
                 self.samples[hist_file] = collections.OrderedDict()
     
                 self.samples[hist_file]['%s/h4b_large_%s'%(region.name, var.name)] = {
-                    "label" : '10#times Statistics True Background',
+                    "label" : 'True Background',
                     "weight": pi_4,
                     "legend": 1,
                     "isData" : True,
                     "ratio" : "numer A",
                     "color" : "ROOT.kBlack",
-                }
-        
-                self.samples[hist_file]['%s/h4b_%s'%(region.name, var.name)] = {
-                    "label" : 'True Background',
-                    "legend": 2,
-    #                "isData" : True,
-    #                "ratio" : "numer A",
-                    "color" : "ROOT.kBlack",
-                    "alpha" : 0.5,
-                    "marker": "1",
-                    "lineColor" : "ROOT.kWhite",
-                    "lineAlpha": 0,  
-                    #"fillColor" : "ROOT.kBlack",
-                    #"fillAlpha": 0.5,  
-                    "weight": 1,
-                    "ratio": "denom A"
                     }
+# TODO
+#                self.samples[hist_file]['%s/h4b_%s'%(region.name, var.name)] = {
+#                    "label" : 'True Background',
+#                    "legend": 2,
+#                    "color" : "ROOT.kBlack",
+#                    #"alpha" : 0.5,
+#                    "marker": "1",
+#                    #"fillColor" : "ROOT.kBlack",
+#                   # "fillAlpha": 0.5,  
+#                    "weight": 1,
+#                    "ratio": "denom A",
+#                    "drawOptions" : "PE x0 E0E2",
+#                    }
                 self.samples[hist_file]['%s/h_%s_%s'%(region.name, method_name, var.name)] = {
-                    "label" : "FvT Model",
+                    "label" : method + " Model",
                     "weight": 1,
                     "legend": 3,
                     "ratio" : "denom A",
@@ -444,25 +441,25 @@ def plot_fit_hists(hist_file, method_name, plot_vars, x_titles, norm=False):
                     "ratio" : "numer A",
                     "color" : "ROOT.kBlack"}
                 self.samples[hist_file]['%s/h_benchmark_%s'%(region.name, var.name)] = {
-                    "label" : "Scaled Three-tag Model",
+                    "label" : "Scaled Three-tag Background",
                     "weight": 1,
                     "legend": 2,
                     "ratio" : "denom A",
                     "color" : "ROOT.kOrange+1"}
                 self.samples[hist_file]['%s/h_%s_%s'%(region.name, hh_fvt, var.name)] = {
-                    "label" : "FvT Model",
+                    "label" : "HH-FvT Model",
                     "weight": 1,
                     "legend": 3,
                     "ratio" : "denom A",
                     "color" : "ROOT.kRed"}
                 self.samples[hist_file]['%s/h_%s_%s'%(region.name, hh_ot, var.name)] = {
-                    "label" : "OT Model",
+                    "label" : "HH-OT Model",
                     "weight": 1,
                     "legend": 4,
                     "ratio" : "denom A",
                     "color" : "ROOT.kBlue"}
                 self.samples[hist_file]['%s/h_%s_%s'%(region.name, hh_comb, var.name)] = {
-                    "label" : "OT+FvT Model",
+                    "label" : "HH-Comb Model",
                     "weight": 1,
                     "legend": 5,
                     "ratio" : "denom A",
@@ -518,7 +515,7 @@ def plot_fit_hists(hist_file, method_name, plot_vars, x_titles, norm=False):
             variables.append(variable(plot_vars[i], x_titles[i], divideByBinWidth=100))
 
         else:
-            variables.append(variable(plot_vars[i], x_titles[i], divideByBinWidth=100))
+            variables.append(variable(plot_vars[i], x_titles[i]))
 
     plots = []
     for region in regions:

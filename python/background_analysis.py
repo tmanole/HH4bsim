@@ -342,9 +342,8 @@ if args.plot or args.sumplot or args.fit or args.updateweights:
     df4b = pd.read_hdf(aux_dir + "events/" + data + "/dataframes/bbbb.h5")
 
 ### Make univariate hists if asked.
-print("Making univariate histograms.")
-
 if args.make_univariate_hists:
+    print("Making univariate histograms.")
     make_univariate_hists(bbbj_tree, '3b', data=data)
     make_univariate_hists(bbbb_tree, '4b', data=data)
     make_dijet_masses(bbbj_tree, region='SR', four_tag='3b', data=data)
@@ -521,7 +520,7 @@ if plotting: # or args.validation:
 
         hist_file = ROOT.TFile(hist_path, 'READ')
 
-        make_fit_hists(bbbj_tree, hist_file, method_name)
+        make_fit_hists(bbbj_tree, hist_file, method, method_name)
 
         hist_file.Write()
         hist_file.Close()
