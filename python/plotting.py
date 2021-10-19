@@ -3,6 +3,14 @@ from array import array
 import numpy as np
 from copy import copy
 
+
+import sys
+import time
+import collections
+sys.path.insert(0, '../../PlotTools/python/') #https://github.com/patrickbryant/PlotTools
+import PlotTools
+
+
 ROOT.TGaxis.SetMaxDigits(4)
 
 ROOT.TGaxis.SetExponentOffset(0.035, -0.078, "y")
@@ -277,10 +285,7 @@ def plot_production(t4b, t4b_large, sig, t2b, branch, bins, cut, log_scale=False
 
     return c, ratio,l, titleRegion
 
-def plot_summary(t4b, t3b, sig, branch, bins, cut='SR==1', plot_scalars=False, canvas=None, log_scale=False, norm=False, branchfit=None, xAxisTitle="", method="", hist_file=None, save_root_hists=True):
-    if branchfit is None:
-        branchfit = branch
-
+def tree_to_hist(t, branch, bins, weight, cut, hname, hist_file):
     region = cut.replace("==1","")
 
     pi = 1
@@ -291,334 +296,176 @@ def plot_summary(t4b, t3b, sig, branch, bins, cut='SR==1', plot_scalars=False, c
     scale_4b  = 1#0.0998996846167015
     sig_fraction = 3.8/7134 # signal fraction from table 8.1 2016 data https://cds.cern.ch/record/2644551?ln=en
 
-    if save_root_hists and hist_file is not None:
-        if not hist_file.GetDirectory(region):
-            hist_file.mkdir(region)
-        hist_file.cd(region)
-        tdir = ROOT.gDirectory
+    if not hist_file.GetDirectory(region):
+        hist_file.mkdir(region)
+    hist_file.cd(region)
+    tdir = ROOT.gDirectory
  
     if type(bins) is list: # variable binning
         bins = array('f', bins)
-        h2b   = ROOT.TH1F('h2b_'  +branchfit, '', len(bins)-1, bins)
-        h2b1  = ROOT.TH1F('h2b1_' +branchfit, '', len(bins)-1, bins)
-        h2b2  = ROOT.TH1F('h2b2_' +branchfit, '', len(bins)-1, bins)
-        h2b3  = ROOT.TH1F('h2b3_' +branchfit, '', len(bins)-1, bins)
-        h4b   = ROOT.TH1F('h4b_'  +branch,    '', len(bins)-1, bins)
-        hsig1 = ROOT.TH1F('hsig1_'+branch,    '', len(bins)-1, bins)
+        h  = ROOT.TH1F(hname + '_' +branch, '', len(bins)-1, bins)
         bins = ''
-        h4b.SetDirectory(tdir)
+        h.SetDirectory(tdir)
 
-#    t2b1.Draw(branchfit+">>h2b_"  +branchfit+bins, str(scale_3b)  + "*weight*("+cut+")/reweight")
-#    t2b1.Draw(branchfit+">>h2b1_" +branchfit+bins, str(scale_fit) + "*weight*("+cut+")")
-#    t2b2.Draw(branchfit+">>h2b2_" +branchfit+bins, str(scale_fit) + "*weight*("+cut+")")
-#    t2b3.Draw(branchfit+">>h2b3_" +branchfit+bins, str(scale_fit) + "*weight*("+cut+")")
-#    t4b .Draw(branch   +">>h4b_"  +branch   +bins, str(scale_4b)  + "*weight*("+cut+")")
-#    sig.Draw(branch   +">>hsig_"+branch   +bins, str(pi)        + "*weight*("+cut+")")
+    t.Draw(branch+">>" + hname + "_"  +branch+bins, str(scale_3b)  + "*" + weight + "*("+cut+")")
 
-    t3b.Draw(branchfit+">>h2b_"  +branchfit+bins, str(scale_3b)  + "*weight*("+cut+")")
-    t3b.Draw(branchfit+">>h2b1_" +branchfit+bins, str(scale_fit) + "*w_HH_FvT__cl_np799_l0_01_e10*("+cut+")")
-    t3b.Draw(branchfit+">>h2b2_" +branchfit+bins, str(scale_fit) + "*w_HH_Comb_FvT__pl_emd_p1_R0_4__cl_np799_l0_01_e10*("+cut+")")
-    t3b.Draw(branchfit+">>h2b3_" +branchfit+bins, str(scale_fit) + "*w_HH_OT__pl_emd_p1_R0_4__K_1*("+cut+")")
-    t4b.Draw(branch   +">>h4b_"  +branch   +bins, str(scale_4b)  + "*weight*("+cut+")")
-    sig.Draw(branch   +">>hsig1_"+branch   +bins, str(pi)         + "*weight*("+cut+")")
+    h   = ROOT.gDirectory.Get(hname + "_"  +branch)
 
-    h2b   = ROOT.gDirectory.Get("h2b_"  +branchfit)
-    h2b1  = ROOT.gDirectory.Get("h2b1_" +branchfit)
-    h2b2  = ROOT.gDirectory.Get("h2b2_" +branchfit)
-    h2b3  = ROOT.gDirectory.Get("h2b3_" +branchfit)
-    h4b   = ROOT.gDirectory.Get("h4b_"  +branch)
-    hsig1 = ROOT.gDirectory.Get("hsig1_"+branch)
+#####    try:
+#####        hsig1.Scale(sig_fraction * h4b.Integral()/hsig1.Integral()) # this method only works for normalizing the signal in the SR where every event is included in the correspoding hist exactly once!!! 
+#####        print("Normalize signal")
+#####    except:
+#####        print("Error!")
+#####        pass
 
-    try:
-        hsig1.Scale(sig_fraction * h4b.Integral()/hsig1.Integral()) # this method only works for normalizing the signal in the SR where every event is included in the correspoding hist exactly once!!! 
-        print("Normalize signal")
-    except:
-        print("Error!")
-        pass
+    hist_file.Append(h)
 
-    # try:
-    #     h2b.Scale(h4b.Integral()/h2b.Integral())
-    # except:
-    #     pass
 
-    if plot_scalars:
-        sig2.Draw(branch+">>hsig2_"+branch+bins,str(pi) + "*weight*("+cut+")")
-        hsig2 = ROOT.gDirectory.Get("hsig2_"+branch)
+
+
+
+
+
+
+hist_file = '../results/MG3/summary/hists.root'
+
+class nameTitle:
+    def __init__(self, name, title):
+        self.name  = name
+        self.title = title
+class variable:
+    def __init__(self, name, xTitle, yTitle = None, zTitle = None, rebin = None, divideByBinWidth = False, normalize = None, normalizeStack = None, mu_qcd=1, xMin=None):
+        self.name   = name
+        self.xTitle = xTitle
+        self.yTitle = yTitle
+        self.zTitle = zTitle
+        self.xMin = xMin
+        self.rebin  = rebin
+        self.divideByBinWidth = divideByBinWidth
+        self.normalize = normalize
+        # self.normalizeStack = normalizeStack
+        # self.mu_qcd = mu_qcd
+
+
+def plot_fit_hists(hist_file, method_name, norm=False):
+    pi_4 = 0.0998996846167015
     
-        sig3.Draw(branch+">>hsig3_"+branch+bins,str(pi) + "*weight*("+cut+")")
-        hsig3 = ROOT.gDirectory.Get("hsig3_"+branch)
+    class standardPlot:
+        def __init__(self, region, var):
+            self.samples=collections.OrderedDict()
+            self.samples[hist_file] = collections.OrderedDict()
 
-    if save_root_hists and hist_file is not None:
-        # if not hist_file.GetDirectory(region):
-        #     hist_file.mkdir(region)
-        # hist_file.cd(region)
-        # print(ROOT.gDirectory.GetName())
-        # h4b  .SetDirectory(ROOT.gDirectory)
-        # h2b  .SetName('%s/%s'%(region, h2b  .GetName()))
-        # h2b1 .SetName('%s/%s'%(region, h2b1 .GetName()))
-        # h2b2 .SetName('%s/%s'%(region, h2b2 .GetName()))
-        # h2b3 .SetName('%s/%s'%(region, h2b3 .GetName()))
-        # h4b  .SetName('%s/%s'%(region, h4b  .GetName()))
-        # hsig.SetName('%s/%s'%(region, hsig.GetName()))
-
-        hist_file.Append(h2b)
-        hist_file.Append(h2b1)
-        hist_file.Append(h2b2)
-        hist_file.Append(h2b3)
-        hist_file.Append(h4b)
-        hist_file.Append(hsig1)
-
-    try:
-        if not h4b.InheritsFrom("TH1"): return
-    except: 
-        return
-
-    c=ROOT.TCanvas(branchfit+cut, branch+" "+cut,700,int((500*1.2)))
-
-    rPad = ROOT.TPad("ratio", "ratio", 0, 0, 1, 0.3)
-    ROOT.gPad.SetTicks(1,1)
-    rPad.SetBottomMargin(0.30)
-    rPad.SetTopMargin(0.035)
-    rPad.SetRightMargin(0.03)
-    rPad.SetFillStyle(0)
-    rPad.Draw()
-
-    #r2Pad = ROOT.TPad("ratio2", "ratio2", 0, 0.0, 1, 0.25)
-    #ROOT.gPad.SetTicks(1,1)
-    #r2Pad.SetBottomMargin(0.30)
-    #r2Pad.SetTopMargin(0.035)
-    #r2Pad.SetRightMargin(0.03)
-    #r2Pad.SetFillStyle(0)
-    #r2Pad.Draw()
-
-    hPad = ROOT.TPad("hist",  "hist",  0, 0.3, 1, 1.0)
-    ROOT.gPad.SetTicks(1,1)
-    hPad.SetBottomMargin(0.02)
-    hPad.SetTopMargin(0.05)
-    hPad.SetRightMargin(0.03)
-
-    if log_scale:
-        hPad.SetLogy()
-
-    hPad.Draw()
-
-    hPad.SetFillStyle(0)
-    ROOT.gStyle.SetPadTickX(1)
-    ROOT.gStyle.SetPadTickY(1)
-    ROOT.gROOT.ForceStyle()
-
-    try:
-        max_heights = [h4b.GetMaximum()]
-    except:
-        max_heights = []
-
-    cols=[ROOT.kBlue, ROOT.kGreen, ROOT.kYellow, ROOT.kRed]
-
-    i = 0
-    for h2 in [h2b1,h2b2, h2b3, h2b]: #h2b3
-        setStyle(h2)
-
-        #h2b.SetTitle(branch+" "+cut)
-        h2.SetTitle("")
-        h2.SetFillColorAlpha(cols[i],0.2)
-        #h2.SetFillColorAlpha(cols[i], 0)#ROOT.kYellow)
-        h2.SetLineWidth(3) 
-        h2.SetLineColor(cols[i])
-
-
-        h2.GetYaxis().SetTitle("Entries")
-
-        if norm: 
-            normHist(h2)
-
-        max_heights.append(h2.GetMaximum())
-        #hMax = max(max2b, max4b)*1.1
-        #h2b.SetMaximum(hMax)
-
-        i+=1
-
-
-    #h4b.SetMaximum(hMax)
-    max_height = np.max(max_heights)*1.1
-
-    for h in [h4b, h2b1, h2b2, h2b3]:
-        h.SetMaximum(max_height)
-        print(h.Integral())
+            self.samples[hist_file]['%s/h4b_large_%s'%(region.name, var.name)] = {
+                "normalize":1,
+                "label" : '10#times Statistics True Background',
+                "weight": pi_4,
+                "legend": 1,
+                "isData" : True,
+                "ratio" : "numer A",
+                "color" : "ROOT.kBlack",
+            }
     
-    setStyle(hsig1)
-    hsig1.SetLineColor(ROOT.kBlue)
-    hsig1.SetLineWidth(3)
-    hsig1.SetLineStyle(7)
-
-    if plot_scalars:
-        setStyle(hsig2)
-        hsig2.SetLineColor(ROOT.kRed)
-        hsig2.SetLineWidth(3)
-        hsig2.SetLineStyle(7)
-
-        setStyle(hsig3)
-        hsig3.SetLineColor(12)
-        hsig3.SetLineWidth(3)
-        hsig3.SetLineStyle(7)
-
-    setStyle(h4b)
-    h4b.SetLineColor(ROOT.kBlack)
+            self.samples[hist_file]['%s/h4b_%s'%(region.name, var.name)] = {
+                "normalize":1,
+                "label" : 'True Background',
+                "legend": 2,
+#                "isData" : True,
+#                "ratio" : "numer A",
+                "color" : "ROOT.kBlack",
+                "alpha" : 0.5,
+                "marker": "1",
+                "lineColor" : "ROOT.kWhite",
+                "lineAlpha": 0,  
+                #"fillColor" : "ROOT.kBlack",
+                #"fillAlpha": 0.5,  
+                "weight": 1,
+                "ratio": "denom A"
+                }
+            self.samples[hist_file]['%s/h_%s_%s'%(region.name, method_name, var.name)] = {
+                "normalize":1,
+                "label" : "FvT Model",
+                "weight": 1,
+                "legend": 3,
+                "ratio" : "denom A",
+                "stack" : 1,
+                "color" : "ROOT.kYellow"}
     
-    h4b.GetYaxis().SetTitle("Entries")
-
-    if norm:
-        normHist(h4b)
-
-    ratio = ROOT.TH1F(h2b2).Clone()
-    ratio.GetXaxis().SetLabelSize(0)
-    ratio.SetTitle("")
-    ratio.GetYaxis().SetNdivisions(503)
-    ratio.SetName(h2b1.GetName().replace("h2b1","h2b1Overh2b2"))
-    ratio.SetStats(0)
-
-    ratio.Divide(h4b)  ###
-
-#    if method == "benchmark":
-#        ratio.SetYTitle("4b/3b")
-
-#    else:
-#        ratio.SetYTitle("/FvT")
-
-    ratio.SetMinimum(0.5)
-    ratio.SetMaximum(1.5)
-    ratio.SetXTitle(xAxisTitle)
-    setStyle(ratio)
-
-    #ratio.GetXaxis().SetLabelSize(30)
-    ratio.GetXaxis().SetLabelSize(0.1)
-    ratio.GetXaxis().SetLabelOffset(0)
-
-    ratio.GetYaxis().SetLabelOffset(0.015)
-    ratio.GetYaxis().SetTitleOffset(1.1 )
-    ratio.GetXaxis().SetTitleSize(25)
-
-    ratio.SetMarkerStyle(20)
-    ratio.SetMarkerSize(0.5)
-
-    ratio2 = ROOT.TH1F(h2b1).Clone()
-    ratio2.GetXaxis().SetLabelSize(0)
-    ratio2.SetTitle("")
-    ratio2.GetYaxis().SetNdivisions(503)
-    ratio2.SetName(h2b1.GetName().replace("h2b1","h2b2Overh2b2"))
-    ratio2.SetStats(0)
-
-    ratio2.Divide(h4b)  ###
-    ratio2.SetYTitle("RF/FvTyyy")
-
-    ratio2.SetMinimum(-0.5)
-    ratio2.SetMaximum(0.5)
-    ratio2.SetXTitle(xAxisTitle)
-    setStyle(ratio2)
-
-    #ratio.GetXaxis().SetLabelSize(30)
-    ratio2.GetXaxis().SetLabelSize(0.1)
-    ratio2.GetXaxis().SetLabelOffset(0)
-
-    ratio2.GetYaxis().SetLabelOffset(0.015)
-    ratio2.GetYaxis().SetTitleOffset(1.1 )
-    ratio2.GetXaxis().SetTitleSize(25)
-
-    ratio2.SetMarkerStyle(20)
-    ratio2.SetMarkerSize(0.5)
-
-    hPad.cd()
-    h2b1.Draw("HIST")
-    h2b.Draw("HIST SAME")
-    h2b2.Draw("HIST SAME")
-    h2b3.Draw("HIST SAME")
-    h4b.Draw("ex0 SAME")
-
-    hsig1.Draw("HIST SAME")
-
-    if plot_scalars:
-        hsig2.Draw("HIST SAME")
-        hsig3.Draw("HIST SAME")
-
-
-    #h4b.Draw("ex0 PE SAME")
-#    h4b.Draw("ex0 axis SAME")
-
-    #hPad.RedrawAxis()
-
-
-    rPad.cd()
-    ratio.Draw("x0 P P0")
-    #ratio2.Draw("x0 P0 SAME")
-
-    #r2Pad.cd()
-    #ratio2.Draw("x0 P P0")
-
-    one = ROOT.TF1("one","1",ratio.GetXaxis().GetXmin(),ratio.GetXaxis().GetXmax())
-    one.SetLineColor(ROOT.kBlack)
-    one.SetLineWidth(1)
-    one.DrawCopy("same l")
-
-    hPad.Update()
-
+            self.samples[hist_file]['%s/h_sig_%s'%(region.name, var.name)] = {
+                "normalize":0.05,
+                "label"    : 'SM HH #times100',
+                "legend"   : 6,
+                "weight" : 0.001,
+                "color"    : "ROOT.kGreen+3"}
     
-    hPad.cd()
-    l=ROOT.TLegend(0.7,0.7,0.9,0.9)
-    l.SetBorderSize(0)
-    l.SetFillColor(0)
-    l.SetFillStyle(0)
-    l.SetTextAlign(12)
-    l.AddEntry(h4b, "4b (x10) Data", "lp")
-    l.AddEntry(h2b, "3b Data", "l")
-    l.AddEntry(h2b1, "HH-FvT", "l")
-    l.AddEntry(h2b2, "HH-Comb", "l")
-    l.AddEntry(h2b3, "HH-OT (K=1)", "l")
-    l.AddEntry(hsig1, "SM HH", "l")
+            if norm:
+                for s in self.samples[hist_file]:
+                    s["normalize"] : 1
 
-    if plot_scalars:
-        l.AddEntry(hsig2, "Scalar (270 GeV)", "l")
-        l.AddEntry(hsig3, "Scalar (280 GeV)", "l")
-
-    l.Draw()
+            
+            rMin = 0.45
+            rMax = 1.55       
     
-    region = "Signal"    if region == "SR" else region
-    region = "Control"   if region == "CR" else region
-    region = "Side-band" if region == "SB" else region
-
-    titleRegion  = ROOT.TLatex(0.75, 0.96, "#bf{"+region+" Region}")
-    titleRegion.SetTextAlign(11)
-    titleRegion.SetNDC()
-    titleRegion.Draw()
-
-    if method != "benchmark":
-        print(method)
-        if method == "resnet":
-            method_name = "HH-FvT"
-
-        elif method[:10] == "horizontal":
-            if len(method) > 10:
-                method_name = "HH-OT, K = " + str(method[12:])
-
-            else:
-                method_name = "HH-OT"
-
-        elif method == "resnet_transport":
-            method_name = "HH-Comb"
-
-        else:
-            method_name = method
+            self.parameters = {"titleLeft"   : '#bf{Simulation}',
+                               "titleCenter" : region.title,
+                               "titleRight"  : 'Models vs. Truth',
+                               #"stackErrors" : True,
+                               "maxDigits"   : 4,
+                               "ratio"     : True,
+                               "rMin"      : rMin,
+                               "rMax"      : rMax,
+                               'xleg'      : [0.6, 0.935],
+                               "rTitle"    : "True / Model",
+                               "xTitle"    : var.xTitle,
+                               "yTitle"    : "Events" if not var.yTitle else var.yTitle,
+                               "outputDir" : '../results/MG3/' + method_name 
+                                                               + '/plots/' 
+                                                               + ("normalized" if norm else "unnormalized") 
+                                                               + "/" + region.name + '/',  
+                               "outputName": var.name,
+                               }
+            if var.divideByBinWidth: self.parameters["divideByBinWidth"] = var.divideByBinWidth
+            if var.xMin is not None: self.parameters['xMin'] = var.xMin
+            if var.rebin: self.parameters["rebin"] = var.rebin
+            #if var.normalizeStack: self.parameters["normalizeStack"] = var.normalizeStack
+            #if 'SvB' in var.name and 'SR' in region.name: self.parameters['xleg'] = [0.3, 0.3+0.33]
     
-        titleMethod  = ROOT.TLatex(0.1, 0.96, "")#bf{Background Method: "+method_name+"}")
+        def plot(self, debug=False):
+            PlotTools.plot(self.samples, self.parameters, debug)
+    
+    
+    regions = [nameTitle('CR', 'Control Region'),
+               nameTitle('SR', 'Signal Region'),
+           ]
 
-        titleMethod.SetTextAlign(11)
-        titleMethod.SetNDC()
-        titleMethod.Draw()
+    variables = [variable('m4j', 'm_{4j} [GeV]', divideByBinWidth=100),
+                 variable('mHH', 'm_{HH} [GeV]', divideByBinWidth=100),
+                 variable('SvB', 'SvB Classifier Output'),#, rebin=10),
+                 variable('FvT', 'FvT Classifier Output'),#, rebin=10),
+                 variable("dRjjClose", 'Minimum #DeltaR(j,j)'),
+                 variable("dRjjOther", 'Complement of Minimum \Delta R(j,j)'),
+                 variable("aveAbsEta", '<|\eta|>'),
+                 variable("jetPt[0]", 'Jet_{0} p_{T} [GeV]'),
+                 variable("jetPt[1]", 'Jet_{1} p_{T} [GeV]'),
+                 variable("jetPt[2]", 'Jet_{2} p_{T} [GeV]'),
+                 variable("jetPt[3]", 'Jet_{3} p_{T} [GeV]'),
+                 variable("jetPt[0]+jetPt[1]+jetPt[2]+jetPt[3]", "Scalar sum of jet p_{T}'s [GeV]"),
+                 #variable('reweight', 'FvT weight'),
+             ]
 
+    # TODO variables 
+    #variables = []
+    #for i in range 
 
-        hPad.Update()
+    ##
 
-        return c, ratio,l, [titleRegion, titleMethod]
+    plots = []
+    for region in regions:
+        for var in variables:
+            plots.append(standardPlot(region, var))
+    for plot in plots: 
+        plot.plot()
+        plot.parameters['logY'] = True
+        #plot.parameters['yMin'] = 10
+        plot.plot()
 
-    hPad.Update()
-
-    return c, ratio,l, titleRegion
 

@@ -7,7 +7,7 @@ import os.path
 from array import array
 
 sys.path.insert(0, "transport_scripts")
-import transport_func4b as f4b
+#import transport_func4b as f4b
 sys.path.insert(0, ".")
     
 def get_plot_tree_path(data):
@@ -76,8 +76,8 @@ def get_plotting_vars():
     bins = [#[200, 226, 256, 291, 331, 377, 431, 493, 565, 649, 747, 861, 1000],#'( 80,200,1000)', #make bins (1000-200)/80=10 GeV wide
 #            [200, 210, 220, 231, 242, 254, 266, 279, 292, 306, 321, 337, 353, 370, 388, 407, 427, 448, 470, 493, 517, 542, 569, 597, 626, 657, 689, 723, 759, 796, 835, 876, 919, 1000],
 #            [200, 210, 220, 231, 242, 254, 266, 279, 292, 306, 321, 337, 353, 370, 388, 407, 427, 448, 470, 493, 517, 542, 569, 597, 626, 657, 689, 723, 759, 796, 835, 876, 919, 1000],
-            '(30,200,1000)',
-            '(30,200,1000)',
+            '(100,200,1000)',
+            '(100,200,1000)',
             '(25,0,2.5)',
             '(40,0,4)',
             '(25,0,2.5)',
@@ -196,6 +196,41 @@ def get_plotting_vars():
 #           ]
 #
 #    return variables, out_names, x_titles, bins
+
+
+def make_base_hist(tree, weight, hist_file, hname):#, tree_true_large, tree_sig_HH4b, tree_fit, hist_file=None):
+
+    plot_tree_path = get_plot_tree_path("MG3")
+
+    variables, out_names, x_titles, bins = get_plotting_vars()
+
+    print(variables)
+
+    for region in ["CR","SR"]:
+        for i in range(len(variables)):
+            print(region, variables[i], x_titles[i], bins[i])
+            plotting.tree_to_hist(tree, variables[i], bins[i], weight, region + "==1", hname, hist_file)
+
+def base_hist_setup(tree_true, tree_true_large, tree_sig, hist_file):
+
+#    hist_file = '../results/MG3/summary/hists.root'
+#    hist_file = ROOT.TFile(hist_file, 'RECREATE')
+
+    make_base_hist(tree_true, "weight", hist_file, "h4b")
+    make_base_hist(tree_true_large, "weight", hist_file, "h4b_large")
+    make_base_hist(tree_sig, "weight", hist_file, "h_sig")
+#    make_base_hist(tree_fit, hist_file)
+
+    hist_file.Write()
+    hist_file.Close()
+
+def make_fit_hists(tree_fit, hist_file, method_name):
+#    make_base_hist(tree_fit, "w_" + method_name, hist_file, "h_"+method_name)
+    plotting.plot_fit_hists(hist_file, method_name=method_name, norm=True) 
+    plotting.plot_fit_hists(hist_file, method_name=method_name, norm=False) 
+
+def make_summary_hists():
+    pass
 
 
 def fit_plots(tree_true, tree_true_large, tree_sig_HH4b, tree_fit, SvB=True, mHH=True, reweight=False, data="MG3", method_name="benchmark", method="benchmark", regions=["SR", "CR", "SB"], fromnp=True, signal=False):
