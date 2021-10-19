@@ -347,7 +347,7 @@ class variable:
         # self.mu_qcd = mu_qcd
 
 
-def plot_fit_hists(hist_file, method_name, norm=False):
+def plot_fit_hists(hist_file, method_name, plot_vars, x_titles, norm=False):
     pi_4 = 0.0998996846167015
     
     class standardPlot:
@@ -437,26 +437,13 @@ def plot_fit_hists(hist_file, method_name, norm=False):
                nameTitle('SR', 'Signal Region'),
            ]
 
-    variables = [variable('m4j', 'm_{4j} [GeV]', divideByBinWidth=100),
-                 variable('mHH', 'm_{HH} [GeV]', divideByBinWidth=100),
-                 variable('SvB', 'SvB Classifier Output'),#, rebin=10),
-                 variable('FvT', 'FvT Classifier Output'),#, rebin=10),
-                 variable("dRjjClose", 'Minimum #DeltaR(j,j)'),
-                 variable("dRjjOther", 'Complement of Minimum \Delta R(j,j)'),
-                 variable("aveAbsEta", '<|\eta|>'),
-                 variable("jetPt[0]", 'Jet_{0} p_{T} [GeV]'),
-                 variable("jetPt[1]", 'Jet_{1} p_{T} [GeV]'),
-                 variable("jetPt[2]", 'Jet_{2} p_{T} [GeV]'),
-                 variable("jetPt[3]", 'Jet_{3} p_{T} [GeV]'),
-                 variable("jetPt[0]+jetPt[1]+jetPt[2]+jetPt[3]", "Scalar sum of jet p_{T}'s [GeV]"),
-                 #variable('reweight', 'FvT weight'),
-             ]
+    variables = []
+    for i in range(len(plot_vars)):
+        if plot_vars[i] in ["mHH", "m4j"]:
+            variables.append(variable(plot_vars[i], x_titles[i], divideByBinWidth=100))
 
-    # TODO variables 
-    #variables = []
-    #for i in range 
-
-    ##
+        else:
+            variables.append(variable(plot_vars[i], x_titles[i], divideByBinWidth=100))
 
     plots = []
     for region in regions:
