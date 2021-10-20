@@ -13,11 +13,11 @@ pi_S = 100
 
 ### IDs of main methods.
 method_ids = {
-        "fvt"       : "HH-FvT-cl_np799_l0_01_e10",
+        "fvt"       : "HH_FvT__cl_np799_l0_01_e10",
         "comb"      : "HH_Comb_FvT__pl_emd_p1_R0_4__cl_np799_l0_01_e10",
-        "ot1"       : "HH-OT-pl_emd_p1_R0_4-K_1",
-        "ot5"       : "HH-OT-pl_emd_p1_R0_4-K_5",
-        "ot10"      : "HH-OT-pl_emd_p1_R0_4-K_10",
+        "ot1"       : "HH_OT__pl_emd_p1_R0_4__K_1",
+        "ot5"       : "HH_OT__pl_emd_p1_R0_4__K_5",
+        "ot10"      : "HH_OT__pl_emd_p1_R0_4__K_10",
         "benchmark" : "benchmark",
         }
 
