@@ -5,11 +5,14 @@ import sys
 import pathlib
 import os.path
 from array import array
+from definitions import *
 
 sys.path.insert(0, "transport_scripts")
 #import transport_func4b as f4b
 sys.path.insert(0, ".")
-    
+
+
+
 def get_plot_tree_path(data):
     path = "../results/" + data + "/plot_trees/"
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
@@ -120,8 +123,8 @@ def base_hist_setup(tree_true, tree_true_large, tree_sig, hist_file):
 #    hist_file = ROOT.TFile(hist_file, 'RECREATE')
 
     make_base_hist(tree_true, "weight", hist_file, "h4b", scale=1)
-    make_base_hist(tree_true_large, "weight", hist_file, "h4b_large", scale=0.0998996846167015)
-    make_base_hist(tree_sig, "weight", hist_file, "h_sig", scale=100)
+    make_base_hist(tree_true_large, "weight", hist_file, "h4b_large", scale=pi_4L)
+    make_base_hist(tree_sig, "weight", hist_file, "h_sig", scale=pi_S)
 #    make_base_hist(tree_fit, hist_file)
 
     hist_file.Write()

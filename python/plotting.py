@@ -10,6 +10,8 @@ import collections
 sys.path.insert(0, '../../PlotTools/python/') #https://github.com/patrickbryant/PlotTools
 import PlotTools
 
+sys.path.insert(0, 'methods') 
+from definitions import *
 
 ROOT.TGaxis.SetMaxDigits(4)
 
@@ -66,8 +68,6 @@ class variable:
 
 
 def plot_fit_hists(hist_file, method, method_name, plot_vars, x_titles, norm=False):
-    pi_4 = 0.0998996846167015
-
     class standardPlot:
         def __init__(self, region, var):
 
@@ -106,7 +106,7 @@ def plot_fit_hists(hist_file, method, method_name, plot_vars, x_titles, norm=Fal
                     "color" : "ROOT.kYellow"}
         
                 self.samples[hist_file]['%s/h_sig_%s'%(region.name, var.name)] = {
-                    "label"    : 'SM HH #times 100',
+                    "label"    : method_legends["signal"],
                     "legend"   : 6,
                     "weight"   : 1,
                     "color"    : "ROOT.kGreen+3"}
@@ -165,27 +165,27 @@ def plot_fit_hists(hist_file, method, method_name, plot_vars, x_titles, norm=Fal
                     "legend": 2,
                     "ratio" : "denom A",
                     "color" : "ROOT.kOrange+1"}
-                self.samples[hist_file]['%s/h_%s_%s'%(region.name, hh_fvt, var.name)] = {
-                    "label" : "HH-FvT Model",
+                self.samples[hist_file]['%s/h_%s_%s'%(region.name, method_ids["fvt"], var.name)] = {
+                    "label" : method_legends["fvt"],
                     "weight": 1,
                     "legend": 3,
                     "ratio" : "denom A",
                     "color" : "ROOT.kRed"}
-                self.samples[hist_file]['%s/h_%s_%s'%(region.name, hh_ot, var.name)] = {
-                    "label" : "HH-OT Model",
+                self.samples[hist_file]['%s/h_%s_%s'%(region.name, method_ids["ot1"], var.name)] = {
+                    "label" : method_legend["ot1"],
                     "weight": 1,
                     "legend": 4,
                     "ratio" : "denom A",
                     "color" : "ROOT.kBlue"}
-                self.samples[hist_file]['%s/h_%s_%s'%(region.name, hh_comb, var.name)] = {
-                    "label" : "HH-Comb Model",
+                self.samples[hist_file]['%s/h_%s_%s'%(region.name, method_ids["comb"], var.name)] = {
+                    "label" : method_legends["comb"],
                     "weight": 1,
                     "legend": 5,
                     "ratio" : "denom A",
                     "color" : "ROOT.kViolet-1"}
         
                 self.samples[hist_file]['%s/h_sig_%s'%(region.name, var.name)] = {
-                    "label"    : 'SM HH #times 100',
+                    "label"    : method_legends["signal"],
                     "weight"   : 1,
                     "legend"   : 6,
                     "color"    : "ROOT.kGreen+3"}
