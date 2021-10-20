@@ -17,16 +17,16 @@ ROOT.TGaxis.SetExponentOffset(0.035, -0.078, "y")
 ROOT.TGaxis.SetExponentOffset(-0.085,0.035,'x')
 ROOT.gStyle.SetOptStat(0)
 
-def tree_to_hist(t, branch, bins, weight, cut, hname, hist_file):
+def tree_to_hist(t, branch, bins, weight, cut, hname, hist_file, scale=1):
     region = cut.replace("==1","")
-
-    pi = 1
-   
-    scale_fit  = 1#0.33 #* 0.0998996846167015
-    scale_3b = 1 #t4b.GetEntries('SR==1')/ t2b1.GetEntries('SR==1')  # * 0.0998996846167015
-    #scale_3b = t4b.GetEntries('CR==1') / t2b1.GetEntries('CR==1')
-    scale_4b  = 1#0.0998996846167015
-    sig_fraction = 3.8/7134 # signal fraction from table 8.1 2016 data https://cds.cern.ch/record/2644551?ln=en
+#
+#    pi = 1
+#   
+#    scale_fit  = 1#0.33 #* 0.0998996846167015
+#    scale_3b = 1 #t4b.GetEntries('SR==1')/ t2b1.GetEntries('SR==1')  # * 0.0998996846167015
+#    #scale_3b = t4b.GetEntries('CR==1') / t2b1.GetEntries('CR==1')
+#    scale_4b  = 1#0.0998996846167015
+#    sig_fraction = 3.8/7134 # signal fraction from table 8.1 2016 data https://cds.cern.ch/record/2644551?ln=en
 
     if not hist_file.GetDirectory(region):
         hist_file.mkdir(region)
@@ -39,16 +39,9 @@ def tree_to_hist(t, branch, bins, weight, cut, hname, hist_file):
         bins = ''
         h.SetDirectory(tdir)
 
-    t.Draw(branch+">>" + hname + "_"  +branch+bins, str(scale_3b)  + "*" + weight + "*("+cut+")")
+    t.Draw(branch+">>" + hname + "_"  +branch+bins, str(scale) + "*" + str(weight) + "*("+cut+")")
 
     h   = ROOT.gDirectory.Get(hname + "_"  +branch)
-
-#####    try:
-#####        hsig1.Scale(sig_fraction * h4b.Integral()/hsig1.Integral()) # this method only works for normalizing the signal in the SR where every event is included in the correspoding hist exactly once!!! 
-#####        print("Normalize signal")
-#####    except:
-#####        print("Error!")
-#####        pass
 
     hist_file.Append(h)
 
@@ -85,7 +78,7 @@ def plot_fit_hists(hist_file, method, method_name, plot_vars, x_titles, norm=Fal
     
                 self.samples[hist_file]['%s/h4b_large_%s'%(region.name, var.name)] = {
                     "label" : 'True Background',
-                    "weight": pi_4,
+                    "weight": 1,
                     "legend": 1,
                     "isData" : True,
                     "ratio" : "numer A",
@@ -113,9 +106,9 @@ def plot_fit_hists(hist_file, method, method_name, plot_vars, x_titles, norm=Fal
                     "color" : "ROOT.kYellow"}
         
                 self.samples[hist_file]['%s/h_sig_%s'%(region.name, var.name)] = {
-                    "label"    : 'SM HH #times100',
+                    "label"    : 'SM HH #times 100',
                     "legend"   : 6,
-                    "weight" : 0.001,
+                    "weight"   : 1,
                     "color"    : "ROOT.kGreen+3"}
         
                 if norm:
@@ -161,6 +154,7 @@ def plot_fit_hists(hist_file, method, method_name, plot_vars, x_titles, norm=Fal
         
                 self.samples[hist_file]['%s/h4b_%s'%(region.name, var.name)] = {
                     "label" : '10#times Statistics True Background',
+                    "weight": 1,
                     "legend": 1,
                     "isData" : True,
                     "ratio" : "numer A",
@@ -191,14 +185,15 @@ def plot_fit_hists(hist_file, method, method_name, plot_vars, x_titles, norm=Fal
                     "color" : "ROOT.kViolet-1"}
         
                 self.samples[hist_file]['%s/h_sig_%s'%(region.name, var.name)] = {
-                    "label"    : 'SM HH #times100',
+                    "label"    : 'SM HH #times 100',
+                    "weight"   : 1,
                     "legend"   : 6,
-                    "weight" : 0.001,
                     "color"    : "ROOT.kGreen+3"}
-        
+                print(norm) 
                 if norm:
                     for (_,s) in self.samples[hist_file].items():
                         s.update({"normalize" : 1}) 
+                        print("added norm")
     
                 rMin = 0.45
                 rMax = 1.55
@@ -226,6 +221,9 @@ def plot_fit_hists(hist_file, method, method_name, plot_vars, x_titles, norm=Fal
                 if var.rebin: self.parameters["rebin"] = var.rebin
                 #if var.normalizeStack: self.parameters["normalizeStack"] = var.normalizeStack
                 #if 'SvB' in var.name and 'SR' in region.name: self.parameters['xleg'] = [0.3, 0.3+0.33]
+
+
+                print('../results/MG3/summary_plots/'+ ("normalized" if norm else "unnormalized") + "/" + region.name + '/')
         
         def plot(self, debug=False):
             PlotTools.plot(self.samples, self.parameters, debug)

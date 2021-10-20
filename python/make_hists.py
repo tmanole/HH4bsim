@@ -101,7 +101,7 @@ def get_plotting_vars():
     return variables, out_names, x_titles, bins
 
 
-def make_base_hist(tree, weight, hist_file, hname):#, tree_true_large, tree_sig_HH4b, tree_fit, hist_file=None):
+def make_base_hist(tree, weight, hist_file, hname, scale=1):#, tree_true_large, tree_sig_HH4b, tree_fit, hist_file=None):
 
     plot_tree_path = get_plot_tree_path("MG3")
 
@@ -112,16 +112,16 @@ def make_base_hist(tree, weight, hist_file, hname):#, tree_true_large, tree_sig_
     for region in ["CR","SR"]:
         for i in range(len(variables)):
             print(region, variables[i], x_titles[i], bins[i])
-            plotting.tree_to_hist(tree, variables[i], bins[i], weight, region + "==1", hname, hist_file)
+            plotting.tree_to_hist(tree, variables[i], bins[i], weight, region + "==1", hname, hist_file, scale=scale)
 
 def base_hist_setup(tree_true, tree_true_large, tree_sig, hist_file):
 
 #    hist_file = '../results/MG3/summary/hists.root'
 #    hist_file = ROOT.TFile(hist_file, 'RECREATE')
 
-    make_base_hist(tree_true, "weight", hist_file, "h4b")
-    make_base_hist(tree_true_large, "weight", hist_file, "h4b_large")
-    make_base_hist(tree_sig, "weight", hist_file, "h_sig")
+    make_base_hist(tree_true, "weight", hist_file, "h4b", scale=1)
+    make_base_hist(tree_true_large, "weight", hist_file, "h4b_large", scale=0.0998996846167015)
+    make_base_hist(tree_sig, "weight", hist_file, "h_sig", scale=100)
 #    make_base_hist(tree_fit, hist_file)
 
     hist_file.Write()
@@ -130,8 +130,8 @@ def base_hist_setup(tree_true, tree_true_large, tree_sig, hist_file):
 def make_fit_hists(tree_fit, hist_file, method, method_name):
 #    make_base_hist(tree_fit, "w_" + method_name, hist_file, "h_"+method_name)
     plot_vars, _, x_titles, _ = get_plotting_vars()
-    plotting.plot_fit_hists(hist_file, method=method, method_name=method_name, plot_vars=plot_vars, x_titles=x_titles, norm=True) 
     plotting.plot_fit_hists(hist_file, method=method, method_name=method_name, plot_vars=plot_vars, x_titles=x_titles, norm=False) 
+    plotting.plot_fit_hists(hist_file, method=method, method_name=method_name, plot_vars=plot_vars, x_titles=x_titles, norm=True) 
 
 def make_summary_hists(tree_fit, hist_file):
 #    hh_ot   = "HH_OT__pl_emd_p1_R0_4__K_1"
@@ -144,8 +144,8 @@ def make_summary_hists(tree_fit, hist_file):
 #    make_base_hist(tree_fit, "w_benchmark", hist_file, "h_benchmark")
 
     plot_vars, _, x_titles, _ = get_plotting_vars()
-    plotting.plot_fit_hists(hist_file, method=None, method_name=None, plot_vars=plot_vars, x_titles=x_titles, norm=True)
     plotting.plot_fit_hists(hist_file, method=None, method_name=None, plot_vars=plot_vars, x_titles=x_titles, norm=False) 
+    plotting.plot_fit_hists(hist_file, method=None, method_name=None, plot_vars=plot_vars, x_titles=x_titles, norm=True)
 
 
 def fit_plots(tree_true, tree_true_large, tree_sig_HH4b, tree_fit, SvB=True, mHH=True, reweight=False, data="MG3", method_name="benchmark", method="benchmark", regions=["SR", "CR", "SB"], fromnp=True, signal=False):

@@ -329,7 +329,7 @@ if args.plot or args.sumplot or args.fit or args.updateweights:
     bbbj_file = ROOT.TFile(aux_dir + "events/" + data + "/TTree/" + bid + ".root", "READ")
     bbbb_large_file = ROOT.TFile(aux_dir + "events/" + data + "/TTree/bbbb_large.root", "READ")
     
-    sig_HH4b_file = ROOT.TFile(aux_dir + "events/" + data + "/TTree/HH4b_dR04_toyTree.root", "READ")
+    sig_HH4b_file = ROOT.TFile(aux_dir + "events/" + data + "/TTree/HH4b.root", "READ")
     
     ### ROOT TTrees
     bbbb_tree = bbbb_file.Get("Tree")
