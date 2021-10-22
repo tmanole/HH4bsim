@@ -11,7 +11,7 @@ import os
 
 from threading import Thread
 
-###from validation import validation_classifier
+from validation import validation_classifier
 
 import argparse
 parser = argparse.ArgumentParser(description='')
@@ -323,7 +323,7 @@ bid = "bbjj" if bs == 2 else "bbbj"
 bb  = str(bs) + "b"
 
 print("Loading TTrees.")
-if args.plot or args.sumplot or args.fit or args.updateweights:
+if args.plot or args.sumplot or args.fit or args.updateweights or args.validation:
     ### ROOT TFiles
     bbbb_file = ROOT.TFile(aux_dir + "events/" + data + "/TTree/bbbb.root", "READ")
     bbbj_file = ROOT.TFile(aux_dir + "events/" + data + "/TTree/" + bid + ".root", "READ")
@@ -624,11 +624,21 @@ if plotting: # or args.validation:
 #                   sig_S280HH4b_tree,
                    data=data
                   )
+"""
 
 if args.validation:
     region = target[-1]
     pathlib.Path(out_path.replace("fit.root", "") +"fvt_validation/" + region).mkdir(parents=True, exist_ok=True)
-    validation_classifier(fit_tree, aux_dir + "events/" + data + "/dataframes/bbbb_large.h5", data_name=data, method_name=method_name, region=region, epochs=40, num_params=num_params, lrInit=lrInit, train_batch_size=train_batch_size)
+    validation_classifier(bbbj_tree, 
+                          "../events/" + data + "/dataframes/bbbj.h5", 
+                          "../events/" + data + "/dataframes/bbbb_large.h5",
+                          data_name=data, 
+                          method_name=method_name, 
+                          region=region)
+                          #epochs=40, 
+                          #num_params=num_params, 
+                          #lrInit=lrInit, 
+                          #train_batch_size=train_batch_size
 
 #              SvB=True, 
 #              mHH = mHH, 
@@ -638,4 +648,3 @@ if args.validation:
 #              method=method, 
 #              regions=target, 
 #              fromnp=False)
-"""
