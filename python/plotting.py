@@ -172,7 +172,7 @@ def plot_fit_hists(hist_file, method, method_name, plot_vars, x_titles, norm=Fal
                     "ratio" : "denom A",
                     "color" : "ROOT.kRed"}
                 self.samples[hist_file]['%s/h_%s_%s'%(region.name, method_ids["ot1"], var.name)] = {
-                    "label" : method_legend["ot1"],
+                    "label" : method_legends["ot1"],
                     "weight": 1,
                     "legend": 4,
                     "ratio" : "denom A",
