@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, "../../python/fvt_scripts/")
+sys.path.insert(0, "../../python/classifier/")
 import make_df
 import ROOT
 
