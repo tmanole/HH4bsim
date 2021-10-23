@@ -2,9 +2,6 @@ import ROOT
 from array import array
 import sys
 import pathlib
-
-sys.path.insert(0, "fvt_scripts/")
-
 from model_train import modelParameters
 import pandas as pd
 import numpy as np
@@ -53,7 +50,7 @@ dfS["signal"] = 1
 bbbb_file       = ROOT.TFile("../../events/" + data + "/TTree/bbbb.root",              "READ")
 bbbj_file       = ROOT.TFile("../../events/" + data + "/TTree/bbbj.root",              "READ")
 bbbb_large_file = ROOT.TFile("../../events/" + data + "/TTree/bbbb_large.root",        "READ")
-sig_file        = ROOT.TFile("../../events/" + data + "/TTree/HH4b_dR04_toyTree.root", "READ")
+sig_file        = ROOT.TFile("../../events/" + data + "/TTree/HH4b.root", "READ")
 
 ### ROOT ROOT TTrees
 bbbb_tree       = bbbb_file.Get("Tree")
@@ -113,24 +110,3 @@ for k in range(len(tree_names)):
     new_file.Close()
 
     temp_file.Close()
-
-
-
-#bbbb_temp_file = ROOT.TFile("temp_trees/" + class_type + "/bbbb.root", "READ") 
-#bbbb_temp_tree = bbbb_temp_file.Get("Tree")
-#bbbb_file  = ROOT.TFile("../../events/" + data + "/TTree/bbbb.root", "RECREATE")
-#bbbb_tree = bbbb_temp_tree.CloneTree()
-#bbbb_file.Write()
-#bbbb_temp_file.Close()
-#
-#
-#
-#bbbj_file       = ROOT.TFile("../../events/" + data + "/TTree/bbbj.root",              "RECREATE")
-#bbbb_large_file = ROOT.TFile("../../events/" + data + "/TTree/bbbb_large.root",        "RECREATE")
-#sig_file        = ROOT.TFile("../../events/" + data + "/TTree/HH4b_dR04_toyTree.root", "RECREATE")
-#
-#out_files = [out_files[k].Get("Tree") for k in range(len(trees))]
-#
-#
-#
-#
