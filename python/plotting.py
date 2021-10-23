@@ -144,10 +144,6 @@ def plot_fit_hists(hist_file, method, method_name, plot_vars, x_titles, norm=Fal
                 #if 'SvB' in var.name and 'SR' in region.name: self.parameters['xleg'] = [0.3, 0.3+0.33]
 
             else:
-
-                hh_ot   = "HH_OT__pl_emd_p1_R0_4__K_1"
-                hh_comb = "HH_Comb_FvT__pl_emd_p1_R0_4__cl_np799_l0_01_e10"
-                hh_fvt  = "HH_FvT__cl_np799_l0_01_e10"        
         
                 self.samples=collections.OrderedDict()
                 self.samples[hist_file] = collections.OrderedDict()
@@ -171,8 +167,8 @@ def plot_fit_hists(hist_file, method, method_name, plot_vars, x_titles, norm=Fal
                     "legend": 3,
                     "ratio" : "denom A",
                     "color" : "ROOT.kRed"}
-                self.samples[hist_file]['%s/h_%s_%s'%(region.name, method_ids["ot1"], var.name)] = {
-                    "label" : method_legend["ot1"],
+                self.samples[hist_file]['%s/h_%s_%s'%(region.name, method_ids["ot10"], var.name)] = {
+                    "label" : method_legends["ot10"],
                     "weight": 1,
                     "legend": 4,
                     "ratio" : "denom A",
