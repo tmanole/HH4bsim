@@ -564,7 +564,7 @@ if plotting: # or args.validation:
         if rh:
             hist_file = ROOT.TFile(hist_path, 'UPDATE')
 
-            hh_ot   = "HH_OT__pl_emd_p1_R0_4__K_1"
+            hh_ot   = "HH_OT__pl_emd_p1_R0_4__K_10"
             hh_comb = "HH_Comb_FvT__pl_emd_p1_R0_4__cl_np799_l0_01_e10"
             hh_fvt  = "HH_FvT__cl_np799_l0_01_e10"
         
