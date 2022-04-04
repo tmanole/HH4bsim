@@ -23,11 +23,11 @@ method_ids = {
 
 ### Legends 
 method_legends = {
-        "fvt"      : "HH-FvT Model",
-        "comb"     : "HH-Comb Model",
-        "ot1"      : "HH-OT Model (K=1)",
-        "ot5"      : "HH-OT Model (K=5)",
-        "ot10"     : "HH-OT Model (K=10)",
+        "fvt"      : "FvT Model",
+        "comb"     : "OT-FvT Model",
+        "ot1"      : "OT-1NN Model ",
+        "ot5"      : "OT-5NN Model ",
+        "ot10"     : "OT-10NN Model",
         "benchmark": "Scaled Three-Tag Data",
         "signal"   : "SM HH #times " + str(int(pi_S)),
         }
