@@ -71,7 +71,7 @@ def plot_fit_hists(hist_file, method, method_name, plot_vars, x_titles, norm=Fal
     class standardPlot:
         def __init__(self, region, var):
 
-            if method_name is not None:
+            if method_name not in ["nn","summary"]:
             
                 self.samples=collections.OrderedDict()
                 self.samples[hist_file] = collections.OrderedDict()
@@ -143,7 +143,7 @@ def plot_fit_hists(hist_file, method, method_name, plot_vars, x_titles, norm=Fal
                 #if var.normalizeStack: self.parameters["normalizeStack"] = var.normalizeStack
                 #if 'SvB' in var.name and 'SR' in region.name: self.parameters['xleg'] = [0.3, 0.3+0.33]
 
-            else:
+            elif method_name=="summary":
         
                 self.samples=collections.OrderedDict()
                 self.samples[hist_file] = collections.OrderedDict()
@@ -221,6 +221,83 @@ def plot_fit_hists(hist_file, method, method_name, plot_vars, x_titles, norm=Fal
 
                 print('../results/MG3/summary_plots/'+ ("normalized" if norm else "unnormalized") + "/" + region.name + '/')
         
+            else: 
+                self.samples=collections.OrderedDict()
+                self.samples[hist_file] = collections.OrderedDict()
+        
+                self.samples[hist_file]['%s/h4b_%s'%(region.name, var.name)] = {
+                    "label" : '10#times Statistics True Background',
+                    "weight": 1,
+                    "legend": 1,
+                    "isData" : True,
+                    "ratio" : "numer A",
+                    "color" : "ROOT.kBlack"}
+                #self.samples[hist_file]['%s/h_benchmark_%s'%(region.name, var.name)] = {
+                #    "label" : "Scaled Three-tag Background",
+                #    "weight": 1,
+                #    "legend": 2,
+                #    "ratio" : "denom A",
+                #    "color" : "ROOT.kOrange+1"}
+                self.samples[hist_file]['%s/h_%s_%s'%(region.name, method_ids["ot1"], var.name)] = {
+                    "label" : method_legends["ot1"],
+                    "weight": 1,
+                    "legend": 3,
+                    "ratio" : "denom A",
+                    "color" : "ROOT.kRed"}
+                self.samples[hist_file]['%s/h_%s_%s'%(region.name, method_ids["ot10"], var.name)] = {
+                    "label" : method_legends["ot10"],
+                    "weight": 1,
+                    "legend": 4,
+                    "ratio" : "denom A",
+                    "color" : "ROOT.kBlue"}
+                self.samples[hist_file]['%s/h_%s_%s'%(region.name, method_ids["ot20"], var.name)] = {
+                    "label" : method_legends["ot20"],
+                    "weight": 1,
+                    "legend": 5,
+                    "ratio" : "denom A",
+                    "color" : "ROOT.kViolet-1"}
+        
+                #self.samples[hist_file]['%s/h_sig_%s'%(region.name, var.name)] = {
+                #    "label"    : method_legends["signal"],
+                #    "weight"   : 1,
+                #    "legend"   : 6,
+                #    "color"    : "ROOT.kGreen+3"}
+                print(norm) 
+                if norm:
+                    for (_,s) in self.samples[hist_file].items():
+                        s.update({"normalize" : 1}) 
+                        print("added norm")
+    
+                rMin = 0.45
+                rMax = 1.55
+        
+                self.parameters = {"titleLeft"   : '#bf{Simulation}',
+                                   "titleCenter" : region.title,
+                                   "titleRight"  : 'Models vs. Truth',
+                                   #"stackErrors" : True,
+                                   "maxDigits"   : 4,
+                                   "ratio"     : True,
+                                   "rMin"      : rMin,
+                                   "rMax"      : rMax,
+                                   'xleg'      : [0.6, 0.935],
+                                   "rTitle"    : "True / Model",
+                                   "xTitle"    : var.xTitle,
+                                   "yTitle"    : "Events" if not var.yTitle else var.yTitle,
+                                   "outputDir" : '../results/MG3/nn_plots/%s/'%(region.name),
+                                   "outputDir" : '../results/MG3/nn_plots/'  
+                                                                   + ("normalized" if norm else "unnormalized") 
+                                                                   + "/" + region.name + '/',  
+                                   "outputName": var.name,
+                                   }
+                if var.divideByBinWidth: self.parameters["divideByBinWidth"] = var.divideByBinWidth
+                if var.xMin is not None: self.parameters['xMin'] = var.xMin
+                if var.rebin: self.parameters["rebin"] = var.rebin
+                #if var.normalizeStack: self.parameters["normalizeStack"] = var.normalizeStack
+                #if 'SvB' in var.name and 'SR' in region.name: self.parameters['xleg'] = [0.3, 0.3+0.33]
+
+
+                print('../results/MG3/nn_plots/'+ ("normalized" if norm else "unnormalized") + "/" + region.name + '/')
+
         def plot(self, debug=False):
             PlotTools.plot(self.samples, self.parameters, debug)
     

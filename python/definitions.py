@@ -18,6 +18,8 @@ method_ids = {
         "ot1"       : "HH_OT__pl_emd_p1_R0_4__K_1",
         "ot5"       : "HH_OT__pl_emd_p1_R0_4__K_5",
         "ot10"      : "HH_OT__pl_emd_p1_R0_4__K_10",
+        "ot10"      : "HH_OT__pl_emd_p1_R0_4__K_10",
+        "ot20"      : "HH_OT__pl_emd_p1_R0_4__K_20",
         "benchmark" : "benchmark",
         }
 
@@ -28,6 +30,21 @@ method_legends = {
         "ot1"      : "OT-1NN Model ",
         "ot5"      : "OT-5NN Model ",
         "ot10"     : "OT-10NN Model",
+        "ot20"     : "OT-20NN Model",
         "benchmark": "Scaled Three-Tag Data",
         "signal"   : "SM HH #times " + str(int(pi_S)),
         }
+
+### Selection constants
+minPt  = 40
+maxEta = 2.5
+
+### Region Definitions
+leadHH, sublHH = 125.0, 125.0
+
+xHHSR = 1.6
+rHHCR = 30
+sHHCR = 1.03
+rHHSB = 45
+sHHSB = 1.05
+
