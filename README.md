@@ -39,7 +39,7 @@ The main script for fitting and plotting background models is `background_analys
 cd python
 python background_analysis.py -m method_name -p True -rh True -v True
 ```
-Here, `-m` refers to the dataset name, which can be one of `HH-FvT`, `HH-Comb-FvT`, `HH-OT`, or `benchmark` which simply refers to a rescaling of the 3b dataset.
+Here, `-m` refers to the method name, which can be one of `HH-FvT`, `HH-Comb-FvT`, `HH-OT`, or `benchmark` which simply refers to a rescaling of the 3b dataset.
 The `-p` switch indicates that histograms of the fit should produced. These plots require `.hist` ROOT files which are reproduced whenever the `-rh` switch is specified. The `-v` switch indicates that a classifier should be trained between the fit and true 4b data as a proxy for their discrepancy. To produce plots which summarize the three methods, run
 ```
 python background_analysis.py -sp True
