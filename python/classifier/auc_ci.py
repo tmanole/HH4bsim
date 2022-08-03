@@ -25,6 +25,7 @@ def bootstrap(x, y, auc, weights, alpha=0.05, B=1000):
         if b % 100 == 0:
             print("boot ",  b)
 
+        np.random.seed(b)
         inds = np.random.choice(a=n, size=n, replace=True).flatten().tolist()
 
         xx = x[inds].flatten()
@@ -36,7 +37,7 @@ def bootstrap(x, y, auc, weights, alpha=0.05, B=1000):
     q1 = np.quantile(aucs, alpha/2)
     q2 = np.quantile(aucs, 1-alpha/2)
 
-    return [auc - q2, auc - q1]
+    return [q1, q2]
 
 def bamber(x, y, auc, alpha=0.05):
     """ Compute the Bamber(1975) Wald CI for the AUC.

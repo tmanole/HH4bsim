@@ -30,7 +30,7 @@ def nn_large_transport(bbbj,
                        N_low_vert=0, 
                        N_high_horiz=16,
                        N_high_vert=33, 
-                       bs=3, K=1, R0=2*np.pi, R=2):
+                       bs=3, K=1, R0=2*np.pi, R=2.75):
 
     """ Transport from SR to CR in large dataset and apply FvT classifier. 
     
@@ -80,9 +80,7 @@ def nn_large_transport(bbbj,
     print("============================================")
     print("Step 1: Starting NN lookup.")
     print("============================================")
-
     full_inv_dists = np.zeros((16940, 124285), dtype=np.float32)  ## This is a very large matrix. 
-
 
     for j in range(N_low_vert, N_high_vert+1):
         print("block " + str(j))

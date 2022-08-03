@@ -12,7 +12,6 @@ import os
 from threading import Thread
 
 from validation import validation_classifier
-
 import argparse
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('-d', '--data', default='MG3', type=str, help='Nickname for dataset to use.')
@@ -32,7 +31,7 @@ parser.add_argument('-dp', '--dp', default="emd_p1_R0_4", type=str, help='Distan
 #parser.add_argument('-tr', '--targetregion', default="SR", type=str, help='Regions where the fit should be made (e.g. SB, CR, CRSR, SBCRSR, etc.)')
 parser.add_argument('-muh','--make_univariate_hists', default=False, type=bool, help='Make univariate histograms of 3b and 4b vars.')
 parser.add_argument('-K','--K', default=1, type=int, help='Number of nearest neighbors for HH-OT method.')
-parser.add_argument('-R','--R', default=0.4, type=float, help='R parameter for EMD distance.')
+parser.add_argument('-R','--R', default=2.75, type=float, help='R parameter for EMD distance.')
 parser.add_argument('-lr','--lrInit', default=0.01, type=float, help='Initial learning rate of trained FvT classifier.')
 parser.add_argument('-tbs','--trbatchsize', default=512, type=int, help='Training batch size for trained FvT classifier.')
 parser.add_argument('-np','--numpar', default=6, type=int, help=' "Number of parameters" for trained FvT classifier.')
@@ -62,7 +61,7 @@ target = ["SR"]
 
 
 aux_dir       = "../"#"/media/tudor/Seagate Portable Drive/Seagate/LHC/"
-aux_dir_large = "/media/tmanole/Seagate Portable Drive/Seagate/LHC/"
+aux_dir_large = "../"#media/tmanole/Seagate Portable Drive/Seagate/LHC/"
 #aux_dir_large = "/media/tudor/Seagate Portable Drive/Seagate/LHC/"
 
 ### Available Datasets (-d).
@@ -656,6 +655,7 @@ if plotting: # or args.validation:
 if args.validation:
     region = target[-1]
     pathlib.Path(out_path.replace("fit.root", "") +"fvt_validation/" + region).mkdir(parents=True, exist_ok=True)
+    np.random.seed(0)
     validation_classifier(bbbj_tree, 
                           "../events/" + data + "/dataframes/bbbj.h5", 
                           "../events/" + data + "/dataframes/bbbb_large.h5",

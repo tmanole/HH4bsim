@@ -291,7 +291,8 @@ class loaderResults_SvB:
                                 'Background')
 
             if doBamber:
-                self.roc.auc_ci = auc_ci.bamber(np.array(self.y_true==d4.index), self.y_pred[:,d4.index], self.roc.auc)
+#                self.roc.auc_ci = auc_ci.bamber(np.array(self.y_true==d4.index), self.y_pred[:,d4.index], self.roc.auc)
+                self.roc_43.auc_ci = auc_ci.bootstrap(np.array(self.y_true==d4.index), self.y_pred[:,d4.index], self.roc_43.auc, self.w)
                 print("Bamber CI: ", self.roc.auc_ci)
 
 ##                zhIndex = self.y_true!=zz.index
@@ -513,7 +514,9 @@ class loaderResults_FvT:
                                    'ThreeTag')
 ## TODO
             if doBamber:
-                self.roc_43.auc_ci = auc_ci.bamber(np.array(self.y_true==d4.index), self.y_pred[:,d4.index], self.roc_43.auc)
+                #self.roc_43.auc_ci = auc_ci.bamber(np.array(self.y_true==d4.index), self.y_pred[:,d4.index], self.roc_43.auc)
+                self.roc_43.auc_ci = auc_ci.bootstrap(np.array(self.y_true==d4.index), self.y_pred[:,d4.index], self.roc_43.auc, self.w)
+
                 print("Bamber CI: ", self.roc_43.auc_ci)
             self.roc = self.roc_43 #+ self.roc_td.auc - 1
 
