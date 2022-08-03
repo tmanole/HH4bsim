@@ -189,7 +189,7 @@ else:
     dd = {"x": s[inds], "y": w1[inds]-w0[inds]}
     dd2 = {"x": np.concatenate([wA1, wA2]), 
            "y": np.concatenate([wB, wC]), 
-           "z": np.concatenate([np.repeat("HH-FvT v HH-Comb", wA1.size), np.repeat("HH-FvT v HH-OT (K=10)", wA2.size)])} 
+           "z": np.concatenate([np.repeat("FvT v OT-FvT", wA1.size), np.repeat("FvT v OT-10NN", wA2.size)])} 
 
     ddd = pd.DataFrame.from_dict(dd2) 
     print(dd2)
@@ -224,9 +224,9 @@ for ax in g.axes.flat:
     ax.plot(x, y, '-r', ms=2, c="purple")
     i+=1
 
-g.axes[0,0].set_xlabel('HH-Comb Weights')# \n (a)')
-g.axes[0,1].set_xlabel('HH-NN Weights (K=10)')# \n (b)')
-g.axes[0,0].set_ylabel('HH-FvT Weights')
+g.axes[0,0].set_xlabel('OT-FvT Weights')# \n (a)')
+g.axes[0,1].set_xlabel('OT-10NN Weights')# \n (b)')
+g.axes[0,0].set_ylabel('FvT Weights')
 g.set_titles("") 
 g.savefig("compare_weights_heatmap.pdf")
 

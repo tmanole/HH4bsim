@@ -147,8 +147,23 @@ def make_summary_hists(tree_fit, hist_file):
 #    make_base_hist(tree_fit, "w_benchmark", hist_file, "h_benchmark")
 
     plot_vars, _, x_titles, _ = get_plotting_vars()
-    plotting.plot_fit_hists(hist_file, method=None, method_name=None, plot_vars=plot_vars, x_titles=x_titles, norm=False) 
-    plotting.plot_fit_hists(hist_file, method=None, method_name=None, plot_vars=plot_vars, x_titles=x_titles, norm=True)
+    plotting.plot_fit_hists(hist_file, method=None, method_name="summary", plot_vars=plot_vars, x_titles=x_titles, norm=False) 
+    plotting.plot_fit_hists(hist_file, method=None, method_name="summary", plot_vars=plot_vars, x_titles=x_titles, norm=True)
+
+def make_nn_hists(tree_fit, hist_file):
+#    hh_ot   = "HH_OT__pl_emd_p1_R0_4__K_1"
+#    hh_comb = "HH_Comb_FvT__pl_emd_p1_R0_4__cl_np799_l0_01_e10"
+#    hh_fvt  = "HH_FvT__cl_np799_l0_01_e10"        
+#
+#    make_base_hist(tree_fit, "w_" + hh_ot, hist_file, "h_"+hh_ot)
+#    make_base_hist(tree_fit, "w_" + hh_comb, hist_file, "h_"+hh_comb)
+#    make_base_hist(tree_fit, "w_" + hh_fvt, hist_file, "h_"+hh_fvt)
+#    make_base_hist(tree_fit, "w_benchmark", hist_file, "h_benchmark")
+
+    plot_vars, _, x_titles, _ = get_plotting_vars()
+    plotting.plot_fit_hists(hist_file, method=None, method_name="nn", plot_vars=plot_vars, x_titles=x_titles, norm=False) 
+    plotting.plot_fit_hists(hist_file, method=None, method_name="nn", plot_vars=plot_vars, x_titles=x_titles, norm=True)
+
 
 
 def fit_plots(tree_true, tree_true_large, tree_sig_HH4b, tree_fit, SvB=True, mHH=True, reweight=False, data="MG3", method_name="benchmark", method="benchmark", regions=["SR", "CR", "SB"], fromnp=True, signal=False):

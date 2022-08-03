@@ -21,6 +21,7 @@ parser.add_argument('-f', '--fit', default=False, type=bool, help='Fit the metho
 parser.add_argument('-p', '--plot', default=False, type=bool, help='Produce plots?')
 parser.add_argument('-v', '--validation', default=False, type=bool, help='Run a classifier to compare fit to SR4b?')
 parser.add_argument('-sp', '--sumplot', default=False, type=bool, help='Produce summary plots?')
+parser.add_argument('-nnp', '--nnplot', default=False, type=bool, help='Produce summary plots?')
 parser.add_argument('-rh', '--redohists', default=False, type=bool, help='Remake base hists?')
 parser.add_argument('-uw', '--updateweights', default=False, type=bool, help='Update SvB and FvT weights?')
 parser.add_argument('-cl', '--cl', default="np799_lr0_01_e29", type=str, help='Classifier nickname.')
@@ -323,7 +324,7 @@ bid = "bbjj" if bs == 2 else "bbbj"
 bb  = str(bs) + "b"
 
 print("Loading TTrees.")
-if args.plot or args.sumplot or args.fit or args.updateweights or args.validation:
+if args.plot or args.sumplot or args.nnplot or args.fit or args.updateweights or args.validation:
     ### ROOT TFiles
     bbbb_file = ROOT.TFile(aux_dir + "events/" + data + "/TTree/bbbb.root", "READ")
     bbbj_file = ROOT.TFile(aux_dir + "events/" + data + "/TTree/" + bid + ".root", "READ")
@@ -466,7 +467,7 @@ else:
     hist_file.Close()
 
 
-plotting = args.plot or args.sumplot
+plotting = args.plot or args.sumplot or args.nnplot
 
 
 #if args.fit or plotting or args.updateweights or args.updateweights:
@@ -588,6 +589,32 @@ if plotting: # or args.validation:
 
         hist_file.Write()
         hist_file.Close()
+
+    if args.nnplot:
+        if rh:
+            hist_file = ROOT.TFile(hist_path, 'UPDATE')
+
+            hh_ot1    = "HH_OT__pl_emd_p1_R0_4__K_1"
+            hh_ot10   = "HH_OT__pl_emd_p1_R0_4__K_10"
+            hh_ot20   = "HH_OT__pl_emd_p1_R0_4__K_20"
+            #hh_ot10  = "HH_Comb_FvT__pl_emd_p1_R0_4__cl_np799_l0_01_e10"
+            #hh_ot20  = "HH_FvT__cl_np799_l0_01_e10"
+        
+            make_base_hist(bbbj_tree, "w_" + hh_ot1,  hist_file, "h_"+hh_ot1)
+            make_base_hist(bbbj_tree, "w_" + hh_ot10, hist_file, "h_"+hh_ot10)
+            make_base_hist(bbbj_tree, "w_" + hh_ot20, hist_file, "h_"+hh_ot20)
+#            make_base_hist(bbbj_tree, "w_benchmark", hist_file, "h_benchmark")
+
+            hist_file.Write()
+            hist_file.Close()
+
+        hist_file = ROOT.TFile(hist_path, 'READ')
+
+        make_nn_hists(bbbj_tree, hist_file=hist_file)
+
+        hist_file.Write()
+        hist_file.Close()
+
 
 
 """
