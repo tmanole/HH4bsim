@@ -73,69 +73,84 @@ aux_dir_large = "../"#media/tmanole/Seagate Portable Drive/Seagate/LHC/"
 # MG2_weight: Same as MG2 with non-uniform weights, Nov 2020. 
 # MG3:        More realistic large dataset, similar to MG2, used to emulate additional jet activity, Nov 2020.
 
-### Method Terminology and description. 
+
+### Method Terminology and description.
 #
-# HH-FvT:      Classifier method, with Patrick's HCR classifier. 
-#              Assumes a classifier has already been trained between 3b and 4b. 
+# FvT:         FvT method.
+#              Assumes a classifier has already been trained between 3b and 4b.
 #              You can train this classifier by running the file methods/fvt/train.py.
-#              You can specify the path of the classifier with the "-cp" switch, 
-#              or you can make a nickname for the classifier and add it in the 
-#              Classifier Dictionary below, and specify it with 
-#              the "-cl" switch. This nickname will be used in the path where the fit is saved. 
+#              You can specify the path of the classifier with the "-cp" switch,
+#              or you can make a nickname for the classifier and add it in the
+#              Classifier Dictionary below, and specify it with
+#              the "-cl" switch. This nickname will be used in the path where the fit is saved.
 #
-# HH-RF:       Classifier method, with a random forest.
-#              Assumes a classifier has already been trained between 3b and 4b. 
-#              Again, you can specify the path of the classifier with the "-cp" switch, 
-#              or you can make a nickname for the classifier and add it in the lines below, 
-#              and specify it with the "-cl" switch. 
+# RF:          Analogue of the FvT method, with a random forest.
+#              Assumes a classifier has already been trained between 3b and 4b.
+#              Again, you can specify the path of the classifier with the "-cp" switch,
+#              or you can make a nickname for the classifier and add it in the lines below,
+#              and specify it with the "-cl" switch.
 #
-# HH-OT:       Horizontal method, which does a nearest neighbor lookup to apply an OT map.
+# OT-kNN:      OT-kNN method.
 #              Assumes that (1) CR3b-CR4b (resp. SB3b-SB4b) distances have been computed,
-#              and (2) that a CR3b-SR3b (resp. SB3b-CR3b) OT coupling has been computed. 
+#              and (2) that a CR3b-SR3b (resp. SB3b-CR3b) OT coupling has been computed.
 #              The paths to these distances are specified with in the "distance_path" and "coupling_path"
 #              variables below. Use the respective "-dp" and "-pl" switches above to specify
-#              nicknames for the distances and couplings, as defined below. 
+#              nicknames for the distances and couplings, as defined below.
 #
-# HH-Comb-FvT: Combination method, which applies the classifier in-sample using an OT map
+# OT-FvT:      Combination method, which applies the classifier in-sample using an OT map
 #              from SR3b to CR3b. Requires a coupling path and a classifier path similarly
 #              as HH-FvT and HH-OT.
-# 
-# HH-Comb-RF:  Same thing, using a random forest instead of Patrick's classifier.
+#
+# OT-RF:       Same thing, using a random forest instead of the FvT classifier.
 
 
 ### Regions.
 # -sr is one of "SR", "CR", "SB", and indicates the region where the fit starts
 # (e.g. this is where the classifier is trained, or where the OT coupling starts).
 # -tr is one of "SB", "SBCR", "SBCRSR", "CR", "CRSR", "SR", and indicates the target
-# regions where the fit is produced (e.g. when you have an OT coupling from CR to SR, 
-# this has no choice but to be SR). 
+# regions where the fit is produced (e.g. when you have an OT coupling from CR to SR,
+# this has no choice but to be SR).
 
 
 ### Examples.
-# Fit HH-FvT method for the MG2 dataset and produce plots of the result, 
+# Fit OT-FvT method for the MG2 dataset and produce plots of the result,
 # using the default classifier trained in the sideband, and produce the fit in SB, CR and SR.
 #
-#    python background_analysis.py -f True -p True -d MG2 -m HH-FvT -sr SB -tr SBCRSR
+#    python background_analysis.py -f True -p True -d MG2 -m OT-FvT -sr SB -tr SBCRSR
 #
-# Do the same thing but now use the default classifier trained in the control region, 
+# Do the same thing but now use the default classifier trained in the control region,
 # and fit the model only in the signal region:
 #
-#    python background_analysis.py -f True -p True -d MG2 -m HH-FvT -sr CR -tr SR
+#    python background_analysis.py -f True -p True -d MG2 -m OT-FvT -sr CR -tr SR
 #
 # Do the same thing, but now don't make output plots, and use one of the non-default classifiers
 #
-#    python background_analysis.py -f True -d MG2 -m HH-FvT -sr CR -tr SR -cl overfit
+#    python background_analysis.py -f True -d MG2 -m OT-FvT -sr CR -tr SR -cl overfit
 #
 # Now produce plots for the above method without having to refit it:
 #
-#    python background_analysis.py -p True -d MG2 -m HH-FvT -sr CR -tr SR -cl overfit
-# 
+#    python background_analysis.py -p True -d MG2 -m OT-FvT -sr CR -tr SR -cl overfit
+#
 # Now train a validation classifier on the above fit, without having to refit the method:
 #
-#    python background_analysis.py -v True -d MG2 -m HH-FvT -sr CR -tr SR -cl overfit
+#    python background_analysis.py -v True -d MG2 -m OT-FvT -sr CR -tr SR -cl overfit
 #
 
 
+if method == "OT-kNN":
+    method = "HH-OT"
+
+if method == "OT-FvT":
+    method = "HH-Comb-FvT"
+
+if method == "OT-RF":
+    method = "HH-Comb-RF"
+
+if method == "FvT":
+    method = "HH-FvT"
+
+if method == "RF":
+    method = "HH-RF"
 
 
 ### Classifier Dictionary (for HH-FvT, HH-Comb)
