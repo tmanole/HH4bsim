@@ -1,7 +1,9 @@
 # HH4bsim
 Data-Driven Background Modeling for Double Higgs Boson Production in the 4b Final State.
  
-![SvB](https://raw.githubusercontent.com/tmanole/HH4bsim/master/SvB_logy.pdf)
+<p aligh="center">
+<img src="https://raw.githubusercontent.com/tmanole/HH4bsim/master/SvB_logy.png",alt="SvB" style="width: 80%;align:center;" />
+</p>0
 
 
 
