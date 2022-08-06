@@ -1,9 +1,9 @@
 # HH4bsim
 Data-Driven Background Modeling for Double Higgs Boson Production in the 4b Final State.
  
-<p aligh="center">
+<p align="center">
 <img src="https://raw.githubusercontent.com/tmanole/HH4bsim/master/SvB_logy.png",alt="SvB" style="width: 80%;align:center;" />
-</p>0
+</p>
 
 
 
@@ -17,7 +17,7 @@ Python 3.5, ROOT, `pyROOT`, `numpy`, `pandas`, `sklearn`, `pytorch`, `scipy`,
 
 This repository is based on the methodologies developed in the preprint
 
-[1] Manole, T., Bryant, P., Alison, J., Kuusela, M., Wasserman, L. (2022). Background Modeling for di-Higgs Boson Production: Density Ratios and Optimal Transport.
+[1] Manole, T., Bryant, P., Alison, J., Kuusela, M., Wasserman, L. (2022). Background Modeling for di-Higgs Boson Production: Density Ratios and Optimal Transport. <i>arXiv preprint arXiv:2208.02807</i>. [[PDF](https://arxiv.org/abs/2208.02807)]
 
 The following three background modeling methods are currently implemented.
 * `FvT`: Train the FvT (Four vs. Three) classifier to discriminate 4b from 3b events in a Control Region, and extrapolate to the Signal Region.
