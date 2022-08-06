@@ -17,7 +17,7 @@ Python 3.5, ROOT, `pyROOT`, `numpy`, `pandas`, `sklearn`, `pytorch`, `scipy`,
 
 This repository is based on the methodologies developed in the preprint
 
-[1] Manole, T., Bryant, P., Alison, J., Kuusela, M., Wasserman, L. (2022). Background Modeling for di-Higgs Boson Production: Density Ratios and Optimal Transport. <i>arXiv preprint arXiv:2208.02807</i>. [[PDF](https://arxiv.org/abs/2208.02807)]
+[1] Manole, T., Bryant, P., Alison, J., Kuusela, M., Wasserman, L. (2022). Background Modeling for Double Higgs Boson Production: Density Ratios and Optimal Transport. <i>arXiv preprint arXiv:2208.02807</i>. [[PDF](https://arxiv.org/abs/2208.02807)]
 
 The following three background modeling methods are currently implemented.
 * `FvT`: Train the FvT (Four vs. Three) classifier to discriminate 4b from 3b events in a Control Region, and extrapolate to the Signal Region.
