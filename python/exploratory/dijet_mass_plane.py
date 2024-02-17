@@ -8,7 +8,67 @@ import ot
 import root_numpy as rn
 import plotting
 import ROOT
+from copy import copy
 
+def doJetPairing(jets):
+    #all possible pairings of the four jets:
+    pairings = [[[0,1],[2,3]],
+                [[0,2],[1,3]],
+                [[0,3],[1,2]]]
+    
+    """dRs0 = [jets[pairing[0][0]].DeltaR(jets[pairing[0][1]]) for pairing in pairings]
+    dRs1 = [jets[pairing[1][0]].DeltaR(jets[pairing[1][1]]) for pairing in pairings]
+    dRs  = dRs0+dRs1
+    idxMin = dRs.index(min(dRs))
+    idxOth = (idxMin+3)%6"""
+
+    #compute m4j to apply m4j dependent deltaRjj requirements (MDRs) on the pairings
+    m4j = (jets[0]+jets[1]+jets[2]+jets[3]).M()
+
+    #For each pairing, calculate if it passes or fails the MDRs.
+    #  If it passes compute the mass difference between the dijets.
+    #  Find the pairing with the smallest mass difference.
+    minMassDifference = 1e6 #start with an arbitrary large value
+    selectedPairing = None
+    for pairing in pairings:
+        #need to compute which dijet in this pairing has more Pt because different MDRs are applied to the leading and subleading dijets
+        dijet0PtSum = jets[pairing[0][0]].Pt() + jets[pairing[0][1]].Pt()
+        dijet1PtSum = jets[pairing[1][0]].Pt() + jets[pairing[1][1]].Pt()
+
+        #sort dijets by their PtSum (leading dijet = "lead", subleading dijet = "subl"):
+        if dijet0PtSum > dijet1PtSum:
+            idxLead = 0
+            idxSubl = 1
+        else:
+            idxLead = 1
+            idxSubl = 0
+
+        leadDeltaR = jets[pairing[idxLead][0]].DeltaR(jets[pairing[idxLead][1]])
+        sublDeltaR = jets[pairing[idxSubl][0]].DeltaR(jets[pairing[idxSubl][1]])
+
+        #passLeadMDR = (360/m4j - 0.5 < leadDeltaR) and (leadDeltaR < 653/m4j + 0.475) if m4j < 1250 else (leadDeltaR < 1)
+        #passSublMDR = (235/m4j       < sublDeltaR) and (sublDeltaR < 875/m4j + 0.350) if m4j < 1250 else (sublDeltaR < 1)
+
+        passLeadMDR = (360/m4j - 0.5 < leadDeltaR) and (leadDeltaR < 653/m4j + 0.977) if m4j < 1250 else (leadDeltaR < 1)
+        passSublMDR = (235/m4j       < sublDeltaR) and (sublDeltaR < 875/m4j + 0.800) if m4j < 1250 else (sublDeltaR < 1)
+
+
+        passMDRs = passLeadMDR and passSublMDR
+
+        if not passMDRs: continue # this pairing failed the MDRs
+
+        #this pairing passed the MDRs. Of the pairings which pass, keep the one with the smallest dijet mass difference
+        lead = jets[pairing[idxLead][0]] + jets[pairing[idxLead][1]]
+        subl = jets[pairing[idxSubl][0]] + jets[pairing[idxSubl][1]]
+
+        massDifference = abs(lead.M()-subl.M())
+
+        if massDifference < minMassDifference: # found a new smallest mass difference, update the minimum variable
+            minMassDifference = massDifference
+            selectedPairing   = [copy(pairing[idxLead]), copy(pairing[idxSubl])] # keep track of the best pairing, put lead at idx 0
+
+    return selectedPairing
+    
 
 def dijet_mass_plane(tree, c=None, stats_title=None, meta=None, SR=1, CR=0, SB=0, llim = None, slim = None, fromnp=True, inds=None):
     """ Plot the diject mass plane for a given TTree.
@@ -69,7 +129,7 @@ def dijet_mass_plane(tree, c=None, stats_title=None, meta=None, SR=1, CR=0, SB=0
 
         jets = [j0,j1,j2,j3]
 
-        pairing = rootToy4b.doJetPairing(jets)
+        pairing = doJetPairing(jets)
 
         if pairing is None:
             i += 1
